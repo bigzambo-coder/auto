@@ -493,7 +493,7 @@
           if (data.humanized_body) {
             const m = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
             titleOut.textContent = m ? m[1].trim() : '';
-            bodyOut.textContent  = data.humanized_body;
+            bodyOut.innerHTML    = data.humanized_body;
           }
 
           if (data.done) {
@@ -552,7 +552,7 @@
     const tm = text.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\]|$)/);
     const bm = text.match(/\[본문\]\s*\n([\s\S]+)/);
     titleOut.textContent = tm ? tm[1].trim() : '';
-    bodyOut.textContent  = bm ? bm[1].trim() : text;
+    bodyOut.innerHTML    = bm ? bm[1].trim() : text;
     bodyOut.scrollTop = bodyOut.scrollHeight;
   }
 

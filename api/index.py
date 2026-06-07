@@ -72,6 +72,7 @@ def generate():
                     yield f"data: {json.dumps({'error': f'{resp.status_code}: {err}'}, ensure_ascii=False)}\n\n"
                     return
 
+                resp.encoding = 'utf-8'
                 for line in resp.iter_lines(decode_unicode=True):
                     if not line or not line.startswith('data:'):
                         continue
