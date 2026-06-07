@@ -519,7 +519,7 @@
     if (!title || !body) { showError('콘텐츠를 먼저 생성해주세요.'); return; }
 
     pubBtn.disabled  = true;
-    pubBtn.innerHTML = '<span class="spinner"></span>발행 중...';
+    pubBtn.innerHTML = '<span class="spinner"></span>발행 준비 중...';
     pubResult.style.display = 'none';
 
     try {
@@ -530,22 +530,39 @@
       });
       const data = await res.json();
 
-      pubResult.style.display = 'block';
       if (data.url) {
+        pubResult.style.display = 'block';
         pubResult.className = 'pub-result ok';
         pubResult.innerHTML = `✅ 발행 완료! → <a href="${data.url}" target="_blank" style="color:inherit;text-decoration:underline;">${data.url}</a>`;
       } else {
-        pubResult.className = 'pub-result fail';
-        pubResult.textContent = '❌ ' + (data.error || '발행 실패');
+        // Playwright 없는 환경 → 반자동 발행
+        await semiAutoPublish(title, body);
       }
     } catch (e) {
-      pubResult.style.display = 'block';
-      pubResult.className = 'pub-result fail';
-      pubResult.textContent = '❌ 오류: ' + e.message;
+      await semiAutoPublish(title, body);
     } finally {
       pubBtn.disabled    = false;
       pubBtn.textContent = '네이버 블로그 발행';
     }
+  }
+
+  async function semiAutoPublish(title, body) {
+    try {
+      await navigator.clipboard.writeText(body);
+    } catch (e) { /* 클립보드 권한 없으면 무시 */ }
+
+    window.open('https://blog.naver.com/PostWrite.nhn', '_blank');
+
+    pubResult.style.display = 'block';
+    pubResult.className = 'pub-result ok';
+    pubResult.innerHTML = `
+      <div style="margin-bottom:8px;font-weight:700;">📋 네이버 에디터가 새 탭에서 열렸습니다</div>
+      <div style="font-size:0.82rem;line-height:1.8;opacity:0.9;">
+        ① 제목 입력란에 아래 제목을 복사·붙여넣기<br>
+        <span style="background:rgba(34,197,94,0.15);border-radius:4px;padding:2px 8px;font-family:monospace;">${title.replace(/</g,'&lt;')}</span><br>
+        ② 본문 영역 클릭 후 <strong>Ctrl+V</strong> (본문이 클립보드에 복사됨)<br>
+        ③ 발행 버튼 클릭
+      </div>`;
   }
 
   function renderOutput(text) {
