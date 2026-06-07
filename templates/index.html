@@ -12,7 +12,6 @@
     --accent: #4f8ef7;
     --accent-hover: #3a7ae8;
     --green: #22c55e;
-    --red: #ef4444;
     --text: #e2e8f0;
     --muted: #8892a4;
     --radius: 12px;
@@ -25,10 +24,10 @@
     min-height: 100vh;
     padding: 40px 20px;
   }
-  .container { max-width: 860px; margin: 0 auto; }
+  .container { max-width: 900px; margin: 0 auto; }
 
   header { text-align: center; margin-bottom: 40px; }
-  header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+  header h1 { font-size: 2rem; font-weight: 700; }
   header h1 span { color: var(--accent); }
   header p { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
 
@@ -39,100 +38,136 @@
     padding: 28px;
     margin-bottom: 20px;
   }
-  .card-title {
-    font-size: 0.8rem;
-    font-weight: 600;
+  .section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     color: var(--muted);
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
-  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .method-option { display: none; }
-  .method-label {
-    display: block;
+  /* ── SEO 방식 선택 ── */
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .method-radio { display: none; }
+  .method-card {
     border: 2px solid var(--border);
     border-radius: 10px;
-    padding: 16px;
+    padding: 18px;
     cursor: pointer;
     transition: all 0.2s;
+    user-select: none;
   }
-  .method-label:hover { border-color: var(--accent); }
-  .method-option:checked + .method-label {
+  .method-card:hover { border-color: var(--accent); background: rgba(79,142,247,0.04); }
+  .method-radio:checked + .method-card {
     border-color: var(--accent);
-    background: rgba(79,142,247,0.08);
+    background: rgba(79,142,247,0.1);
   }
-  .method-label .label-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
-  .method-label .label-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+  .method-card .m-badge {
+    display: inline-block;
+    background: rgba(79,142,247,0.2);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .method-radio:checked + .method-card .m-badge {
+    background: var(--accent);
+    color: #fff;
+  }
+  .method-card .m-title { font-weight: 700; font-size: 0.97rem; margin-bottom: 8px; }
+  .method-card .m-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.65; }
 
+  /* ── 입력 필드 ── */
   .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 7px; color: var(--muted); }
+  .field label {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
   .field input {
     width: 100%;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 11px 14px;
+    padding: 12px 14px;
     color: var(--text);
     font-size: 0.95rem;
     outline: none;
     transition: border-color 0.2s;
   }
   .field input:focus { border-color: var(--accent); }
-  .field input::placeholder { color: var(--muted); }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field input::placeholder { color: #4a5568; }
+  .field .hint { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-  .checkbox-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--bg);
+  /* ── 인간화 페르소나 ── */
+  .persona-wrap {
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
+    border-radius: 10px;
+    padding: 16px;
     cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
     margin-top: 4px;
   }
-  .checkbox-wrap input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-  .checkbox-wrap .chk-text { font-size: 0.9rem; }
-  .checkbox-wrap .chk-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .persona-wrap:hover { border-color: var(--accent); }
+  .persona-wrap.active { border-color: var(--accent); background: rgba(79,142,247,0.06); }
+  .persona-wrap input[type=checkbox] { display: none; }
+  .persona-check {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .persona-wrap.active .persona-check { border-color: var(--accent); background: var(--accent); }
+  .persona-text .p-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 4px; }
+  .persona-text .p-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
 
-  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px; }
+  /* ── 버튼 ── */
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .btn {
-    width: 100%;
-    padding: 14px;
+    padding: 15px;
     border: none;
     border-radius: 10px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .btn-green { background: var(--green); color: #fff; }
-  .btn-green:hover:not(:disabled) { background: #16a34a; transform: translateY(-1px); }
-  .btn-green:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  #result-section { display: none; margin-top: 20px; }
-  .result-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    justify-content: center;
+    gap: 8px;
   }
-  .badge {
+  .btn-generate { background: var(--accent); color: #fff; }
+  .btn-generate:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79,142,247,0.4); }
+  .btn-publish { background: #16a34a; color: #fff; }
+  .btn-publish:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(34,197,94,0.4); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  /* ── 결과 ── */
+  #result-section { display: none; margin-top: 20px; }
+  .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .status-pill {
     border-radius: 20px;
-    padding: 3px 12px;
+    padding: 4px 14px;
     font-size: 0.78rem;
-    font-weight: 600;
+    font-weight: 700;
     border: 1px solid;
   }
-  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); border-color: rgba(79,142,247,0.3); }
-  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.3); }
-
+  .pill-generating { background: rgba(79,142,247,0.15); color: var(--accent); border-color: rgba(79,142,247,0.4); }
+  .pill-done { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.4); }
   .copy-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -145,78 +180,79 @@
   }
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  .output-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px; }
   #title-output {
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 14px;
+    padding: 14px 16px;
     font-size: 1.05rem;
-    font-weight: 600;
-    margin-bottom: 14px;
-    min-height: 48px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    min-height: 50px;
     outline: none;
+    line-height: 1.5;
   }
   #body-output {
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 14px;
+    padding: 16px;
     font-size: 0.88rem;
-    line-height: 1.7;
-    min-height: 300px;
-    max-height: 500px;
+    line-height: 1.75;
+    min-height: 320px;
+    max-height: 520px;
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
     outline: none;
   }
-  [contenteditable]:focus { border-color: var(--accent); }
+  [contenteditable="true"]:focus { border-color: var(--accent); }
 
-  .publish-result {
+  .notice {
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── 발행 결과 ── */
+  .pub-result {
     margin-top: 14px;
     border-radius: 8px;
-    padding: 12px 16px;
+    padding: 13px 16px;
     font-size: 0.88rem;
     display: none;
   }
-  .publish-result.success {
-    background: rgba(34,197,94,0.1);
-    border: 1px solid rgba(34,197,94,0.3);
-    color: var(--green);
-  }
-  .publish-result.error {
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
-    color: #f87171;
-  }
+  .pub-result.ok { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.35); color: var(--green); }
+  .pub-result.fail { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); color: #f87171; }
 
+  /* ── 오류 ── */
   .error-box {
     background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
+    border: 1px solid rgba(239,68,68,0.35);
     border-radius: 8px;
     padding: 12px 16px;
     color: #f87171;
-    font-size: 0.88rem;
+    font-size: 0.87rem;
     margin-top: 12px;
     display: none;
   }
 
+  /* ── 애니메이션 ── */
   .spinner {
-    display: inline-block;
     width: 16px; height: 16px;
     border: 2px solid rgba(255,255,255,0.3);
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
   }
-  .cursor::after { content: '▋'; animation: blink 0.7s infinite; color: var(--accent); }
+  .cursor::after { content: '▋'; animation: blink 0.75s infinite; color: var(--accent); }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  @media (max-width: 600px) {
-    .method-grid, .row, .btn-row { grid-template-columns: 1fr; }
+  @media (max-width: 620px) {
+    .method-grid, .two-col, .action-row { grid-template-columns: 1fr; }
     header h1 { font-size: 1.5rem; }
   }
 </style>
@@ -226,60 +262,87 @@
 
   <header>
     <h1>📝 네이버 블로그 <span>자동 발행기</span></h1>
-    <p>SEO 최적화된 블로그 글을 AI로 자동 생성하고 네이버에 발행합니다</p>
+    <p>주제와 키워드만 입력하면 SEO 최적화된 블로그 글을 자동으로 생성하고 발행합니다</p>
   </header>
 
-  <!-- SEO 방식 -->
+  <!-- STEP 1: SEO 방식 -->
   <div class="card">
-    <div class="card-title">SEO 방식 선택</div>
+    <div class="section-title">① SEO 최적화 방식 선택</div>
     <div class="method-grid">
+
       <div>
-        <input type="radio" name="method" id="m-traditional" value="traditional" class="method-option" checked>
-        <label for="m-traditional" class="method-label">
-          <div class="label-title">🏆 기존방식 (C-Rank/D.I.A.+)</div>
-          <div class="label-desc">진정성·전문성 최우선. 직접 경험 후기, 저자 정보, 신뢰 출처로 네이버 알고리즘 점수 극대화</div>
+        <input type="radio" name="method" id="m-traditional" value="traditional" class="method-radio" checked>
+        <label for="m-traditional" class="method-card">
+          <div class="m-badge">기존방식</div>
+          <div class="m-title">C-Rank / D.I.A.+</div>
+          <div class="m-desc">
+            2025-2026 검색 환경 대응 (C-Rank/D.I.A.+): 키워드 반복보다 <strong style="color:var(--text)">'진정성'</strong>과 <strong style="color:var(--text)">'전문성'</strong>을 최우선으로 합니다. 직접 경험한 후기, 저자 정보 명시, 신뢰할 수 있는 출처 인용을 통해 네이버의 최신 알고리즘 점수를 극대화합니다.
+          </div>
         </label>
       </div>
+
       <div>
-        <input type="radio" name="method" id="m-aeo" value="aeo" class="method-option">
-        <label for="m-aeo" class="method-label">
-          <div class="label-title">🤖 AI AEO</div>
-          <div class="label-desc">두괄식 요약 → 비교 테이블 → FAQ 3단 구성으로 AI 인식률 극대화</div>
+        <input type="radio" name="method" id="m-aeo" value="aeo" class="method-radio">
+        <label for="m-aeo" class="method-card">
+          <div class="m-badge">AI AEO</div>
+          <div class="m-title">AI 브리핑 노출 최적화</div>
+          <div class="m-desc">
+            AI 브리핑 노출 (AEO): <strong style="color:var(--text)">두괄식 요약 → 비교 테이블 → FAQ</strong>의 3단 구성으로 기계가 읽기 쉬운 포맷과 인용구를 사용하여 AI 인식률을 극대화합니다.
+          </div>
         </label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STEP 2: 키워드 입력 -->
+  <div class="card">
+    <div class="section-title">② 키워드 입력</div>
+
+    <div class="field">
+      <label>주제 <span class="req">*</span></label>
+      <input type="text" id="topic" placeholder="예: 강남 맛집 추천">
+    </div>
+
+    <div class="two-col">
+      <div class="field">
+        <label>메인 키워드 <span class="req">*</span></label>
+        <input type="text" id="main-keyword" placeholder="예: 강남 파스타 맛집">
+        <div class="hint">검색 최적화할 핵심 키워드</div>
+      </div>
+      <div class="field">
+        <label>서브키워드</label>
+        <input type="text" id="sub-keywords" placeholder="예: 강남역 이탈리안, 강남 데이트 코스">
+        <div class="hint">선택 입력 · 쉼표(,)로 구분</div>
       </div>
     </div>
   </div>
 
-  <!-- 입력 -->
+  <!-- STEP 3: 인간화 페르소나 -->
   <div class="card">
-    <div class="card-title">키워드 설정</div>
-    <div class="field">
-      <label>주제 *</label>
-      <input type="text" id="topic" placeholder="예: 강남 맛집 추천">
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>메인 키워드 *</label>
-        <input type="text" id="main-keyword" placeholder="예: 강남 파스타 맛집">
-      </div>
-      <div class="field">
-        <label>서브키워드 (선택, 쉼표 구분)</label>
-        <input type="text" id="sub-keywords" placeholder="예: 강남역 이탈리안, 강남 데이트">
-      </div>
-    </div>
-    <label class="checkbox-wrap">
+    <div class="section-title">③ 인간화 페르소나 적용 (AI 탐지 우회)</div>
+    <label class="persona-wrap" id="persona-wrap" onclick="togglePersona()">
       <input type="checkbox" id="humanize">
-      <div>
-        <div class="chk-text">인간화 페르소나 적용 (AI 탐지 우회)</div>
-        <div class="chk-sub">구어체·1인칭 마커를 추가해 사람이 쓴 글처럼 변환합니다</div>
+      <div class="persona-check" id="persona-check"></div>
+      <div class="persona-text">
+        <div class="p-title">인간화 페르소나 적용 (AI 탐지 우회)</div>
+        <div class="p-desc">
+          블로그가 AI처럼 작성하지 않고 사람이 쓰는 것처럼 변환합니다.<br>
+          구어체·1인칭 마커(솔직히 말하면, 제 경험으로는…)·자연스러운 전환구를 추가해
+          AI 탐지 도구를 우회하고 사람이 쓴 글처럼 발행됩니다.
+        </div>
       </div>
     </label>
   </div>
 
   <!-- 버튼 -->
-  <div class="btn-row">
-    <button class="btn btn-primary" id="generate-btn" disabled>콘텐츠 생성</button>
-    <button class="btn btn-green" id="publish-btn" disabled>네이버 블로그 발행</button>
+  <div class="action-row">
+    <button class="btn btn-generate" id="generate-btn" disabled>
+      콘텐츠 생성
+    </button>
+    <button class="btn btn-publish" id="publish-btn" disabled>
+      네이버 블로그 발행
+    </button>
   </div>
   <div class="error-box" id="error-box"></div>
 
@@ -287,56 +350,75 @@
   <div id="result-section">
     <div class="card">
       <div class="result-header">
-        <div class="card-title" style="margin:0;">생성된 콘텐츠</div>
+        <div class="section-title" style="margin:0;">생성된 블로그 글</div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <span class="badge badge-blue" id="status-badge">생성 중...</span>
-          <button class="copy-btn" onclick="copyAll()">복사</button>
+          <span class="status-pill pill-generating" id="status-pill">생성 중...</span>
+          <button class="copy-btn" onclick="copyAll(this)">전체 복사</button>
         </div>
       </div>
+
+      <div class="output-label">제목</div>
       <div id="title-output" contenteditable="true" class="cursor"></div>
+
+      <div class="output-label">본문</div>
       <div id="body-output" contenteditable="true" class="cursor"></div>
-      <div class="publish-result" id="publish-result"></div>
+
+      <div class="notice">제목·본문을 직접 수정한 후 발행할 수 있습니다</div>
+      <div class="pub-result" id="pub-result"></div>
     </div>
   </div>
 
 </div>
-
 <script>
-  const topicEl = document.getElementById('topic');
-  const kwEl = document.getElementById('main-keyword');
-  const genBtn = document.getElementById('generate-btn');
-  const pubBtn = document.getElementById('publish-btn');
-  const errorBox = document.getElementById('error-box');
-  const resultSection = document.getElementById('result-section');
-  const titleOutput = document.getElementById('title-output');
-  const bodyOutput = document.getElementById('body-output');
-  const statusBadge = document.getElementById('status-badge');
-  const publishResult = document.getElementById('publish-result');
+  const topicEl   = document.getElementById('topic');
+  const kwEl      = document.getElementById('main-keyword');
+  const genBtn    = document.getElementById('generate-btn');
+  const pubBtn    = document.getElementById('publish-btn');
+  const errorBox  = document.getElementById('error-box');
+  const resultSec = document.getElementById('result-section');
+  const titleOut  = document.getElementById('title-output');
+  const bodyOut   = document.getElementById('body-output');
+  const statusPill= document.getElementById('status-pill');
+  const pubResult = document.getElementById('pub-result');
 
+  // 버튼 활성화
   [topicEl, kwEl].forEach(el => el.addEventListener('input', () => {
     genBtn.disabled = !(topicEl.value.trim() && kwEl.value.trim());
   }));
+
+  // 인간화 체크박스 토글
+  function togglePersona() {
+    const cb   = document.getElementById('humanize');
+    const wrap = document.getElementById('persona-wrap');
+    const chk  = document.getElementById('persona-check');
+    cb.checked = !cb.checked;
+    wrap.classList.toggle('active', cb.checked);
+    chk.textContent = cb.checked ? '✓' : '';
+  }
 
   genBtn.addEventListener('click', generate);
   pubBtn.addEventListener('click', publish);
 
   async function generate() {
-    const topic = topicEl.value.trim();
+    const topic        = topicEl.value.trim();
     const main_keyword = kwEl.value.trim();
     const sub_keywords = document.getElementById('sub-keywords').value.trim();
-    const method = document.querySelector('input[name=method]:checked').value;
-    const humanize = document.getElementById('humanize').checked;
+    const method       = document.querySelector('input[name=method]:checked').value;
+    const humanize     = document.getElementById('humanize').checked;
 
+    // 초기화
     errorBox.style.display = 'none';
-    publishResult.style.display = 'none';
-    resultSection.style.display = 'block';
-    titleOutput.textContent = '';
-    bodyOutput.textContent = '';
-    titleOutput.classList.add('cursor');
-    bodyOutput.classList.add('cursor');
+    pubResult.style.display = 'none';
+    resultSec.style.display = 'block';
+    titleOut.textContent = '';
+    bodyOut.textContent  = '';
+    titleOut.classList.add('cursor');
+    bodyOut.classList.add('cursor');
     pubBtn.disabled = true;
 
-    setStatus('blue', '생성 중...');
+    statusPill.textContent = '생성 중...';
+    statusPill.className   = 'status-pill pill-generating';
+
     genBtn.disabled = true;
     genBtn.innerHTML = '<span class="spinner"></span>생성 중...';
 
@@ -349,9 +431,9 @@
         body: JSON.stringify({ topic, main_keyword, sub_keywords, method, humanize })
       });
 
-      const reader = res.body.getReader();
+      const reader  = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = '';
+      let   buffer  = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -365,7 +447,7 @@
           if (!line.startsWith('data: ')) continue;
           const data = JSON.parse(line.slice(6));
 
-          if (data.error) { showError(data.error); return; }
+          if (data.error)  { showError(data.error); return; }
 
           if (data.chunk) {
             fullText += data.chunk;
@@ -374,87 +456,81 @@
 
           if (data.humanized_body) {
             const m = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
-            titleOutput.textContent = m ? m[1].trim() : '';
-            bodyOutput.textContent = data.humanized_body;
+            titleOut.textContent = m ? m[1].trim() : '';
+            bodyOut.textContent  = data.humanized_body;
           }
 
           if (data.done) {
-            titleOutput.classList.remove('cursor');
-            bodyOutput.classList.remove('cursor');
-            setStatus('green', '완료 ✓');
+            titleOut.classList.remove('cursor');
+            bodyOut.classList.remove('cursor');
+            statusPill.textContent = '생성 완료 ✓';
+            statusPill.className   = 'status-pill pill-done';
             pubBtn.disabled = false;
           }
         }
       }
     } catch (e) {
-      showError('오류: ' + e.message);
+      showError('오류가 발생했습니다: ' + e.message);
     } finally {
-      genBtn.disabled = false;
+      genBtn.disabled  = false;
       genBtn.textContent = '다시 생성';
     }
   }
 
   async function publish() {
-    const title = titleOutput.innerText.trim();
-    const body = bodyOutput.innerText.trim();
-
+    const title = titleOut.innerText.trim();
+    const body  = bodyOut.innerText.trim();
     if (!title || !body) { showError('콘텐츠를 먼저 생성해주세요.'); return; }
 
-    pubBtn.disabled = true;
+    pubBtn.disabled  = true;
     pubBtn.innerHTML = '<span class="spinner"></span>발행 중...';
-    publishResult.style.display = 'none';
+    pubResult.style.display = 'none';
 
     try {
-      const res = await fetch('/publish', {
+      const res  = await fetch('/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, body })
       });
       const data = await res.json();
 
-      publishResult.style.display = 'block';
+      pubResult.style.display = 'block';
       if (data.url) {
-        publishResult.className = 'publish-result success';
-        publishResult.innerHTML = `✅ 발행 완료! <a href="${data.url}" target="_blank" style="color:inherit;">${data.url}</a>`;
+        pubResult.className = 'pub-result ok';
+        pubResult.innerHTML = `✅ 발행 완료! → <a href="${data.url}" target="_blank" style="color:inherit;text-decoration:underline;">${data.url}</a>`;
       } else {
-        publishResult.className = 'publish-result error';
-        publishResult.textContent = '❌ ' + (data.error || '발행 실패');
+        pubResult.className = 'pub-result fail';
+        pubResult.textContent = '❌ ' + (data.error || '발행 실패');
       }
     } catch (e) {
-      publishResult.style.display = 'block';
-      publishResult.className = 'publish-result error';
-      publishResult.textContent = '❌ 오류: ' + e.message;
+      pubResult.style.display = 'block';
+      pubResult.className = 'pub-result fail';
+      pubResult.textContent = '❌ 오류: ' + e.message;
     } finally {
-      pubBtn.disabled = false;
+      pubBtn.disabled    = false;
       pubBtn.textContent = '네이버 블로그 발행';
     }
   }
 
   function renderOutput(text) {
-    const titleMatch = text.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\]|$)/);
-    const bodyMatch = text.match(/\[본문\]\s*\n([\s\S]+)/);
-    titleOutput.textContent = titleMatch ? titleMatch[1].trim() : '';
-    bodyOutput.textContent = bodyMatch ? bodyMatch[1].trim() : text;
-    bodyOutput.scrollTop = bodyOutput.scrollHeight;
-  }
-
-  function setStatus(color, text) {
-    statusBadge.textContent = text;
-    statusBadge.className = 'badge badge-' + color;
+    const tm = text.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\]|$)/);
+    const bm = text.match(/\[본문\]\s*\n([\s\S]+)/);
+    titleOut.textContent = tm ? tm[1].trim() : '';
+    bodyOut.textContent  = bm ? bm[1].trim() : text;
+    bodyOut.scrollTop = bodyOut.scrollHeight;
   }
 
   function showError(msg) {
-    errorBox.textContent = msg;
-    errorBox.style.display = 'block';
+    errorBox.textContent    = msg;
+    errorBox.style.display  = 'block';
+    resultSec.style.display = 'none';
   }
 
-  function copyAll() {
-    const title = titleOutput.innerText;
-    const body = bodyOutput.innerText;
-    navigator.clipboard.writeText(title + '\n\n' + body).then(() => {
-      const btn = event.target;
+  function copyAll(btn) {
+    const text = titleOut.innerText + '\n\n' + bodyOut.innerText;
+    navigator.clipboard.writeText(text).then(() => {
       btn.textContent = '복사됨 ✓';
-      setTimeout(() => btn.textContent = '복사', 2000);
+      setTimeout(() => btn.textContent = '전체 복사', 2000);
     });
   }
 </script>
