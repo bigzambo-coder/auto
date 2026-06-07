@@ -19,7 +19,8 @@ app = Flask(__name__, template_folder='../templates')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    api_key_set = bool(os.getenv('ANTHROPIC_API_KEY'))
+    return render_template('index.html', api_key_set=api_key_set)
 
 
 @app.route('/generate', methods=['POST'])

@@ -48,9 +48,11 @@
   }
 
   /* ── SEO 방식 선택 ── */
-  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
+  .method-grid > div { display: flex; flex-direction: column; }
   .method-radio { display: none; }
   .method-card {
+    flex: 1;
     border: 2px solid var(--border);
     border-radius: 10px;
     padding: 18px;
@@ -251,6 +253,26 @@
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── API 키 경고 배너 ── */
+  .api-warning {
+    background: rgba(251,191,36,0.12);
+    border: 1px solid rgba(251,191,36,0.4);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .api-warning strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+  .api-warning code {
+    background: rgba(251,191,36,0.15);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: monospace;
+    font-size: 0.82rem;
+  }
+
   @media (max-width: 620px) {
     .method-grid, .two-col, .action-row { grid-template-columns: 1fr; }
     header h1 { font-size: 1.5rem; }
@@ -264,6 +286,14 @@
     <h1>📝 네이버 블로그 <span>자동 발행기</span></h1>
     <p>주제와 키워드만 입력하면 SEO 최적화된 블로그 글을 자동으로 생성하고 발행합니다</p>
   </header>
+
+  {% if not api_key_set %}
+  <div class="api-warning">
+    <strong>⚠️ ANTHROPIC_API_KEY가 설정되지 않았습니다</strong>
+    Vercel 대시보드 → 프로젝트 선택 → <strong>Settings → Environment Variables</strong>에서<br>
+    <code>ANTHROPIC_API_KEY</code> = <code>sk-ant-...</code> 를 추가한 후 재배포해주세요.
+  </div>
+  {% endif %}
 
   <!-- STEP 1: SEO 방식 -->
   <div class="card">
@@ -430,6 +460,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, main_keyword, sub_keywords, method, humanize })
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        showError(errData.error || `서버 오류가 발생했습니다. (${res.status})`);
+        return;
+      }
 
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
