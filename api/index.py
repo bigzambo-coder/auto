@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 import anthropic
 import json
 import re
+import asyncio
+
+if sys.platform == 'win32' and hasattr(asyncio, 'WindowsSelectorEventLoopPolicy'):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # type: ignore[attr-defined]
 
 load_dotenv()
 
@@ -55,7 +59,6 @@ def generate():
                     full_text += chunk
                     yield f"data: {json.dumps({'chunk': chunk}, ensure_ascii=False)}\n\n"
 
-            # 인간화 후처리
             if humanize:
                 from core.humanizer import apply_persona
                 body_match = re.search(r'\[본문\]\s*\n(.+)', full_text, re.DOTALL)
@@ -73,6 +76,27 @@ def generate():
         mimetype='text/event-stream',
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'},
     )
+
+
+@app.route('/publish', methods=['POST'])
+def publish():
+    try:
+        from core.naver_publisher import publish_to_naver
+    except ImportError:
+        return jsonify({'error': 'Playwright가 설치되지 않았습니다. 로컬 환경에서만 발행 가능합니다.'}), 501
+
+    data = request.get_json()
+    title = (data.get('title') or '').strip()
+    body = (data.get('body') or '').strip()
+
+    if not title or not body:
+        return jsonify({'error': '제목과 본문이 없습니다.'}), 400
+
+    try:
+        url = asyncio.run(publish_to_naver(title, body))
+        return jsonify({'url': url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

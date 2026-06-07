@@ -12,6 +12,7 @@
     --accent: #4f8ef7;
     --accent-hover: #3a7ae8;
     --green: #22c55e;
+    --red: #ef4444;
     --text: #e2e8f0;
     --muted: #8892a4;
     --radius: 12px;
@@ -47,7 +48,6 @@
     margin-bottom: 18px;
   }
 
-  /* SEO 방식 선택 */
   .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .method-option { display: none; }
   .method-label {
@@ -66,10 +66,9 @@
   .method-label .label-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
   .method-label .label-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
 
-  /* 입력 필드 */
   .field { margin-bottom: 16px; }
   .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 7px; color: var(--muted); }
-  .field input, .field textarea {
+  .field input {
     width: 100%;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -80,11 +79,10 @@
     outline: none;
     transition: border-color 0.2s;
   }
-  .field input:focus, .field textarea:focus { border-color: var(--accent); }
-  .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--muted); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-  /* 체크박스 */
   .checkbox-wrap {
     display: flex;
     align-items: center;
@@ -100,7 +98,7 @@
   .checkbox-wrap .chk-text { font-size: 0.9rem; }
   .checkbox-wrap .chk-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
 
-  /* 버튼 */
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px; }
   .btn {
     width: 100%;
     padding: 14px;
@@ -113,10 +111,12 @@
   }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover:not(:disabled) { background: #16a34a; transform: translateY(-1px); }
+  .btn-green:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  /* 결과 영역 */
-  #result-section { display: none; }
+  #result-section { display: none; margin-top: 20px; }
   .result-header {
     display: flex;
     justify-content: space-between;
@@ -124,14 +124,15 @@
     margin-bottom: 14px;
   }
   .badge {
-    background: rgba(34,197,94,0.15);
-    color: var(--green);
-    border: 1px solid rgba(34,197,94,0.3);
     border-radius: 20px;
     padding: 3px 12px;
     font-size: 0.78rem;
     font-weight: 600;
+    border: 1px solid;
   }
+  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); border-color: rgba(79,142,247,0.3); }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.3); }
+
   .copy-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -153,6 +154,7 @@
     font-weight: 600;
     margin-bottom: 14px;
     min-height: 48px;
+    outline: none;
   }
   #body-output {
     background: var(--bg);
@@ -166,28 +168,27 @@
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
+    outline: none;
   }
+  [contenteditable]:focus { border-color: var(--accent); }
 
-  /* 스트리밍 커서 */
-  .cursor::after {
-    content: '▋';
-    animation: blink 0.7s infinite;
-    color: var(--accent);
+  .publish-result {
+    margin-top: 14px;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    display: none;
   }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-  /* 로딩 */
-  .spinner {
-    display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
+  .publish-result.success {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: var(--green);
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .publish-result.error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #f87171;
+  }
 
   .error-box {
     background: rgba(239,68,68,0.1);
@@ -200,8 +201,22 @@
     display: none;
   }
 
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .cursor::after { content: '▋'; animation: blink 0.7s infinite; color: var(--accent); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   @media (max-width: 600px) {
-    .method-grid, .row { grid-template-columns: 1fr; }
+    .method-grid, .row, .btn-row { grid-template-columns: 1fr; }
     header h1 { font-size: 1.5rem; }
   }
 </style>
@@ -211,7 +226,7 @@
 
   <header>
     <h1>📝 네이버 블로그 <span>자동 발행기</span></h1>
-    <p>SEO 최적화된 블로그 글을 AI로 자동 생성합니다</p>
+    <p>SEO 최적화된 블로그 글을 AI로 자동 생성하고 네이버에 발행합니다</p>
   </header>
 
   <!-- SEO 방식 -->
@@ -262,23 +277,25 @@
   </div>
 
   <!-- 버튼 -->
-  <button class="btn btn-primary" id="generate-btn" disabled>
-    콘텐츠 생성
-  </button>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="generate-btn" disabled>콘텐츠 생성</button>
+    <button class="btn btn-green" id="publish-btn" disabled>네이버 블로그 발행</button>
+  </div>
   <div class="error-box" id="error-box"></div>
 
   <!-- 결과 -->
-  <div id="result-section" style="margin-top:20px;">
+  <div id="result-section">
     <div class="card">
       <div class="result-header">
         <div class="card-title" style="margin:0;">생성된 콘텐츠</div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <span class="badge" id="status-badge">생성 중...</span>
-          <button class="copy-btn" id="copy-btn" onclick="copyAll()">복사</button>
+          <span class="badge badge-blue" id="status-badge">생성 중...</span>
+          <button class="copy-btn" onclick="copyAll()">복사</button>
         </div>
       </div>
-      <div id="title-output" class="cursor"></div>
-      <div id="body-output" class="cursor"></div>
+      <div id="title-output" contenteditable="true" class="cursor"></div>
+      <div id="body-output" contenteditable="true" class="cursor"></div>
+      <div class="publish-result" id="publish-result"></div>
     </div>
   </div>
 
@@ -288,18 +305,20 @@
   const topicEl = document.getElementById('topic');
   const kwEl = document.getElementById('main-keyword');
   const genBtn = document.getElementById('generate-btn');
+  const pubBtn = document.getElementById('publish-btn');
   const errorBox = document.getElementById('error-box');
   const resultSection = document.getElementById('result-section');
   const titleOutput = document.getElementById('title-output');
   const bodyOutput = document.getElementById('body-output');
   const statusBadge = document.getElementById('status-badge');
+  const publishResult = document.getElementById('publish-result');
 
-  // 버튼 활성화
   [topicEl, kwEl].forEach(el => el.addEventListener('input', () => {
     genBtn.disabled = !(topicEl.value.trim() && kwEl.value.trim());
   }));
 
   genBtn.addEventListener('click', generate);
+  pubBtn.addEventListener('click', publish);
 
   async function generate() {
     const topic = topicEl.value.trim();
@@ -308,18 +327,16 @@
     const method = document.querySelector('input[name=method]:checked').value;
     const humanize = document.getElementById('humanize').checked;
 
-    // 초기화
     errorBox.style.display = 'none';
+    publishResult.style.display = 'none';
     resultSection.style.display = 'block';
     titleOutput.textContent = '';
     bodyOutput.textContent = '';
     titleOutput.classList.add('cursor');
     bodyOutput.classList.add('cursor');
-    statusBadge.textContent = '생성 중...';
-    statusBadge.style.background = 'rgba(79,142,247,0.15)';
-    statusBadge.style.color = '#4f8ef7';
-    statusBadge.style.borderColor = 'rgba(79,142,247,0.3)';
+    pubBtn.disabled = true;
 
+    setStatus('blue', '생성 중...');
     genBtn.disabled = true;
     genBtn.innerHTML = '<span class="spinner"></span>생성 중...';
 
@@ -348,10 +365,7 @@
           if (!line.startsWith('data: ')) continue;
           const data = JSON.parse(line.slice(6));
 
-          if (data.error) {
-            showError(data.error);
-            break;
-          }
+          if (data.error) { showError(data.error); return; }
 
           if (data.chunk) {
             fullText += data.chunk;
@@ -359,27 +373,60 @@
           }
 
           if (data.humanized_body) {
-            // 인간화된 본문으로 교체
-            const titleMatch = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
-            titleOutput.textContent = titleMatch ? titleMatch[1].trim() : '';
+            const m = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
+            titleOutput.textContent = m ? m[1].trim() : '';
             bodyOutput.textContent = data.humanized_body;
           }
 
           if (data.done) {
             titleOutput.classList.remove('cursor');
             bodyOutput.classList.remove('cursor');
-            statusBadge.textContent = '완료 ✓';
-            statusBadge.style.background = 'rgba(34,197,94,0.15)';
-            statusBadge.style.color = '#22c55e';
-            statusBadge.style.borderColor = 'rgba(34,197,94,0.3)';
+            setStatus('green', '완료 ✓');
+            pubBtn.disabled = false;
           }
         }
       }
     } catch (e) {
-      showError('오류가 발생했습니다: ' + e.message);
+      showError('오류: ' + e.message);
     } finally {
       genBtn.disabled = false;
       genBtn.textContent = '다시 생성';
+    }
+  }
+
+  async function publish() {
+    const title = titleOutput.innerText.trim();
+    const body = bodyOutput.innerText.trim();
+
+    if (!title || !body) { showError('콘텐츠를 먼저 생성해주세요.'); return; }
+
+    pubBtn.disabled = true;
+    pubBtn.innerHTML = '<span class="spinner"></span>발행 중...';
+    publishResult.style.display = 'none';
+
+    try {
+      const res = await fetch('/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body })
+      });
+      const data = await res.json();
+
+      publishResult.style.display = 'block';
+      if (data.url) {
+        publishResult.className = 'publish-result success';
+        publishResult.innerHTML = `✅ 발행 완료! <a href="${data.url}" target="_blank" style="color:inherit;">${data.url}</a>`;
+      } else {
+        publishResult.className = 'publish-result error';
+        publishResult.textContent = '❌ ' + (data.error || '발행 실패');
+      }
+    } catch (e) {
+      publishResult.style.display = 'block';
+      publishResult.className = 'publish-result error';
+      publishResult.textContent = '❌ 오류: ' + e.message;
+    } finally {
+      pubBtn.disabled = false;
+      pubBtn.textContent = '네이버 블로그 발행';
     }
   }
 
@@ -391,17 +438,21 @@
     bodyOutput.scrollTop = bodyOutput.scrollHeight;
   }
 
+  function setStatus(color, text) {
+    statusBadge.textContent = text;
+    statusBadge.className = 'badge badge-' + color;
+  }
+
   function showError(msg) {
     errorBox.textContent = msg;
     errorBox.style.display = 'block';
-    resultSection.style.display = 'none';
   }
 
   function copyAll() {
-    const title = titleOutput.textContent;
-    const body = bodyOutput.textContent;
-    navigator.clipboard.writeText(`${title}\n\n${body}`).then(() => {
-      const btn = document.getElementById('copy-btn');
+    const title = titleOutput.innerText;
+    const body = bodyOutput.innerText;
+    navigator.clipboard.writeText(title + '\n\n' + body).then(() => {
+      const btn = event.target;
       btn.textContent = '복사됨 ✓';
       setTimeout(() => btn.textContent = '복사', 2000);
     });
