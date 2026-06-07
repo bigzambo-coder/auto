@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>네이버 블로그 자동 발행기</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2d3148;
+    --accent: #4f8ef7;
+    --accent-hover: #3a7ae8;
+    --green: #22c55e;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .container { max-width: 860px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  /* SEO 방식 선택 */
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .method-option { display: none; }
+  .method-label {
+    display: block;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .method-label:hover { border-color: var(--accent); }
+  .method-option:checked + .method-label {
+    border-color: var(--accent);
+    background: rgba(79,142,247,0.08);
+  }
+  .method-label .label-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
+  .method-label .label-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+  /* 입력 필드 */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 7px; color: var(--muted); }
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* 체크박스 */
+  .checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .checkbox-wrap input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+  .checkbox-wrap .chk-text { font-size: 0.9rem; }
+  .checkbox-wrap .chk-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  /* 버튼 */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* 결과 영역 */
+  #result-section { display: none; }
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .badge {
+    background: rgba(34,197,94,0.15);
+    color: var(--green);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  #title-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+    min-height: 48px;
+  }
+  #body-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* 스트리밍 커서 */
+  .cursor::after {
+    content: '▋';
+    animation: blink 0.7s infinite;
+    color: var(--accent);
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* 로딩 */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #f87171;
+    font-size: 0.88rem;
+    margin-top: 12px;
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .method-grid, .row { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>📝 네이버 블로그 <span>자동 발행기</span></h1>
+    <p>SEO 최적화된 블로그 글을 AI로 자동 생성합니다</p>
+  </header>
+
+  <!-- SEO 방식 -->
+  <div class="card">
+    <div class="card-title">SEO 방식 선택</div>
+    <div class="method-grid">
+      <div>
+        <input type="radio" name="method" id="m-traditional" value="traditional" class="method-option" checked>
+        <label for="m-traditional" class="method-label">
+          <div class="label-title">🏆 기존방식 (C-Rank/D.I.A.+)</div>
+          <div class="label-desc">진정성·전문성 최우선. 직접 경험 후기, 저자 정보, 신뢰 출처로 네이버 알고리즘 점수 극대화</div>
+        </label>
+      </div>
+      <div>
+        <input type="radio" name="method" id="m-aeo" value="aeo" class="method-option">
+        <label for="m-aeo" class="method-label">
+          <div class="label-title">🤖 AI AEO</div>
+          <div class="label-desc">두괄식 요약 → 비교 테이블 → FAQ 3단 구성으로 AI 인식률 극대화</div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 입력 -->
+  <div class="card">
+    <div class="card-title">키워드 설정</div>
+    <div class="field">
+      <label>주제 *</label>
+      <input type="text" id="topic" placeholder="예: 강남 맛집 추천">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>메인 키워드 *</label>
+        <input type="text" id="main-keyword" placeholder="예: 강남 파스타 맛집">
+      </div>
+      <div class="field">
+        <label>서브키워드 (선택, 쉼표 구분)</label>
+        <input type="text" id="sub-keywords" placeholder="예: 강남역 이탈리안, 강남 데이트">
+      </div>
+    </div>
+    <label class="checkbox-wrap">
+      <input type="checkbox" id="humanize">
+      <div>
+        <div class="chk-text">인간화 페르소나 적용 (AI 탐지 우회)</div>
+        <div class="chk-sub">구어체·1인칭 마커를 추가해 사람이 쓴 글처럼 변환합니다</div>
+      </div>
+    </label>
+  </div>
+
+  <!-- 버튼 -->
+  <button class="btn btn-primary" id="generate-btn" disabled>
+    콘텐츠 생성
+  </button>
+  <div class="error-box" id="error-box"></div>
+
+  <!-- 결과 -->
+  <div id="result-section" style="margin-top:20px;">
+    <div class="card">
+      <div class="result-header">
+        <div class="card-title" style="margin:0;">생성된 콘텐츠</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="badge" id="status-badge">생성 중...</span>
+          <button class="copy-btn" id="copy-btn" onclick="copyAll()">복사</button>
+        </div>
+      </div>
+      <div id="title-output" class="cursor"></div>
+      <div id="body-output" class="cursor"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const topicEl = document.getElementById('topic');
+  const kwEl = document.getElementById('main-keyword');
+  const genBtn = document.getElementById('generate-btn');
+  const errorBox = document.getElementById('error-box');
+  const resultSection = document.getElementById('result-section');
+  const titleOutput = document.getElementById('title-output');
+  const bodyOutput = document.getElementById('body-output');
+  const statusBadge = document.getElementById('status-badge');
+
+  // 버튼 활성화
+  [topicEl, kwEl].forEach(el => el.addEventListener('input', () => {
+    genBtn.disabled = !(topicEl.value.trim() && kwEl.value.trim());
+  }));
+
+  genBtn.addEventListener('click', generate);
+
+  async function generate() {
+    const topic = topicEl.value.trim();
+    const main_keyword = kwEl.value.trim();
+    const sub_keywords = document.getElementById('sub-keywords').value.trim();
+    const method = document.querySelector('input[name=method]:checked').value;
+    const humanize = document.getElementById('humanize').checked;
+
+    // 초기화
+    errorBox.style.display = 'none';
+    resultSection.style.display = 'block';
+    titleOutput.textContent = '';
+    bodyOutput.textContent = '';
+    titleOutput.classList.add('cursor');
+    bodyOutput.classList.add('cursor');
+    statusBadge.textContent = '생성 중...';
+    statusBadge.style.background = 'rgba(79,142,247,0.15)';
+    statusBadge.style.color = '#4f8ef7';
+    statusBadge.style.borderColor = 'rgba(79,142,247,0.3)';
+
+    genBtn.disabled = true;
+    genBtn.innerHTML = '<span class="spinner"></span>생성 중...';
+
+    let fullText = '';
+
+    try {
+      const res = await fetch('/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, main_keyword, sub_keywords, method, humanize })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = JSON.parse(line.slice(6));
+
+          if (data.error) {
+            showError(data.error);
+            break;
+          }
+
+          if (data.chunk) {
+            fullText += data.chunk;
+            renderOutput(fullText);
+          }
+
+          if (data.humanized_body) {
+            // 인간화된 본문으로 교체
+            const titleMatch = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
+            titleOutput.textContent = titleMatch ? titleMatch[1].trim() : '';
+            bodyOutput.textContent = data.humanized_body;
+          }
+
+          if (data.done) {
+            titleOutput.classList.remove('cursor');
+            bodyOutput.classList.remove('cursor');
+            statusBadge.textContent = '완료 ✓';
+            statusBadge.style.background = 'rgba(34,197,94,0.15)';
+            statusBadge.style.color = '#22c55e';
+            statusBadge.style.borderColor = 'rgba(34,197,94,0.3)';
+          }
+        }
+      }
+    } catch (e) {
+      showError('오류가 발생했습니다: ' + e.message);
+    } finally {
+      genBtn.disabled = false;
+      genBtn.textContent = '다시 생성';
+    }
+  }
+
+  function renderOutput(text) {
+    const titleMatch = text.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\]|$)/);
+    const bodyMatch = text.match(/\[본문\]\s*\n([\s\S]+)/);
+    titleOutput.textContent = titleMatch ? titleMatch[1].trim() : '';
+    bodyOutput.textContent = bodyMatch ? bodyMatch[1].trim() : text;
+    bodyOutput.scrollTop = bodyOutput.scrollHeight;
+  }
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+    resultSection.style.display = 'none';
+  }
+
+  function copyAll() {
+    const title = titleOutput.textContent;
+    const body = bodyOutput.textContent;
+    navigator.clipboard.writeText(`${title}\n\n${body}`).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = '복사됨 ✓';
+      setTimeout(() => btn.textContent = '복사', 2000);
+    });
+  }
+</script>
+</body>
+</html>

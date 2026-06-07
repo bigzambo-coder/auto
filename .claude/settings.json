@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "PowerShell(winget install Git.Git --silent)",
-      "PowerShell(winget install Git.Git --accept-source-agreements --accept-package-agreements --silent)"
+      "PowerShell(winget install Git.Git --accept-source-agreements --accept-package-agreements --silent)",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\������\\\\Documents\\\\project\\\\auto\\\\api\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\������\\\\Documents\\\\project\\\\auto\\\\templates\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\������"
