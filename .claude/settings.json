@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(winget install Git.Git --silent)",
+      "PowerShell(winget install Git.Git --accept-source-agreements --accept-package-agreements --silent)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\������"
+    ]
+  }
+}

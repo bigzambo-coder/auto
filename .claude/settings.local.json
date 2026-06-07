@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(python --version)",
+      "PowerShell(pip --version)",
+      "Read(//c/Users/������/AppData/Local/Programs/**)",
+      "PowerShell(& \"C:\\\\Users\\\\������\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python315\\\\python.exe\" --version)",
+      "WebSearch",
+      "Read(//c/Users/������/AppData/Local/Temp/claude/c--Users-----Documents-project-auto/c7d7a18f-50d0-4c77-a55d-1b972a99d956/tasks/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\������\\Documents\\project\\auto"
+    ]
+  }
+}
