@@ -18,7 +18,7 @@ app = Flask(__name__, template_folder='../templates')
 
 _GEMINI_URL = (
     'https://generativelanguage.googleapis.com'
-    '/v1beta/models/gemini-2.0-flash:streamGenerateContent'
+    '/v1beta/models/gemini-2.5-flash:streamGenerateContent'
 )
 
 
