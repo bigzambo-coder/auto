@@ -18,7 +18,7 @@ app = Flask(__name__, template_folder='../templates')
 
 _GEMINI_URL = (
     'https://generativelanguage.googleapis.com'
-    '/v1/models/gemini-1.5-flash:streamGenerateContent'
+    '/v1beta/models/gemini-1.5-flash:streamGenerateContent'
 )
 
 
@@ -54,7 +54,7 @@ def generate():
             system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords)
 
             payload = {
-                'system_instruction': {'parts': [{'text': system_prompt}]},
+                'systemInstruction': {'parts': [{'text': system_prompt}]},
                 'contents': [{'role': 'user', 'parts': [{'text': user_prompt}]}],
                 'generationConfig': {'maxOutputTokens': 4096},
             }
