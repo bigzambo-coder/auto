@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Flask, render_template, request, jsonify, Response
 from dotenv import load_dotenv
-import anthropic
+import google.generativeai as genai
 import json
 import re
 import asyncio
@@ -19,7 +19,7 @@ app = Flask(__name__, template_folder='../templates')
 
 @app.route('/')
 def index():
-    api_key_set = bool(os.getenv('ANTHROPIC_API_KEY'))
+    api_key_set = bool(os.getenv('GEMINI_API_KEY'))
     return render_template('index.html', api_key_set=api_key_set)
 
 
@@ -35,9 +35,9 @@ def generate():
     if not topic or not main_keyword:
         return jsonify({'error': '주제와 메인 키워드를 입력해주세요.'}), 400
 
-    api_key = os.getenv('ANTHROPIC_API_KEY')
+    api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
-        return jsonify({'error': 'ANTHROPIC_API_KEY가 설정되지 않았습니다.'}), 500
+        return jsonify({'error': 'GEMINI_API_KEY가 설정되지 않았습니다.'}), 500
 
     def stream():
         try:
@@ -47,18 +47,24 @@ def generate():
                 from prompts.aeo import build_prompt
 
             system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords)
-            client = anthropic.Anthropic(api_key=api_key)
+
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(
+                model_name='gemini-2.0-flash',
+                system_instruction=system_prompt,
+            )
 
             full_text = ''
-            with client.messages.stream(
-                model='claude-sonnet-4-6',
-                max_tokens=4096,
-                system=system_prompt,
-                messages=[{'role': 'user', 'content': user_prompt}],
-            ) as s:
-                for chunk in s.text_stream:
-                    full_text += chunk
-                    yield f"data: {json.dumps({'chunk': chunk}, ensure_ascii=False)}\n\n"
+            response = model.generate_content(
+                user_prompt,
+                stream=True,
+                generation_config=genai.types.GenerationConfig(max_output_tokens=4096),
+            )
+            for chunk in response:
+                text = chunk.text if chunk.text else ''
+                if text:
+                    full_text += text
+                    yield f"data: {json.dumps({'chunk': text}, ensure_ascii=False)}\n\n"
 
             if humanize:
                 from core.humanizer import apply_persona
