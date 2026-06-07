@@ -20,7 +20,6 @@ SYSTEM_PROMPT = """당신은 네이버 블로그 C-Rank/D.I.A.+ 알고리즘 최
    - <h2>, <h3> 소제목으로 명확한 구조화
    - 핵심 정보는 <ul><li> bullet list로 정리
    - 중요 단어는 <strong> bold 처리
-   - 이미지 삽입 위치는 <!-- 사진 --> 주석으로 표시
 
 5. 저자 신뢰도 신호
    - 첫 문단: 왜 이 주제를 쓰는지 배경/동기 설명
@@ -34,10 +33,19 @@ SYSTEM_PROMPT = """당신은 네이버 블로그 C-Rank/D.I.A.+ 알고리즘 최
 (여기에 HTML 본문)"""
 
 
-def build_prompt(topic: str, main_keyword: str, sub_keywords: str) -> tuple[str, str]:
+def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3) -> tuple[str, str]:
     sub_kw_section = ""
     if sub_keywords and sub_keywords.strip():
         sub_kw_section = f"\n서브키워드: {sub_keywords.strip()}"
+
+    image_section = ""
+    if image_count > 0:
+        image_section = f"""
+  * 본문 안에 이미지 마커를 정확히 {image_count}개 삽입하세요. 소제목 바로 아래 또는 주요 단락 사이에 배치:
+    <!-- IMAGE: 구체적이고 사실적인 영어 이미지 설명 (예: a steaming bowl of Korean ramen on a wooden table with chopsticks) -->
+    - 반드시 영어로 작성, 사진처럼 묘사할 것
+    - 주제와 직접 관련된 장면 묘사
+    - {image_count}개 정확히 삽입 (더 많거나 적으면 안 됨)"""
 
     user_prompt = f"""다음 정보를 바탕으로 네이버 블로그 글을 작성해주세요.
 
@@ -51,7 +59,6 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str) -> tuple[str,
   * 첫 문단에 메인 키워드 자연스럽게 포함
   * 실제 경험자 시점으로 작성 (1인칭)
   * 소제목 3개 이상
-  * 마지막 문단에서 독자에게 말 걸기
-  * 이미지 넣을 위치에 <!-- 사진 --> 삽입"""
+  * 마지막 문단에서 독자에게 말 걸기{image_section}"""
 
     return SYSTEM_PROMPT, user_prompt

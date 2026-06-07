@@ -31,10 +31,19 @@ SYSTEM_PROMPT = """당신은 AI 브리핑 노출(AEO: Answer Engine Optimization
 (여기에 HTML 본문)"""
 
 
-def build_prompt(topic: str, main_keyword: str, sub_keywords: str) -> tuple[str, str]:
+def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3) -> tuple[str, str]:
     sub_kw_section = ""
     if sub_keywords and sub_keywords.strip():
         sub_kw_section = f"\n서브키워드: {sub_keywords.strip()}"
+
+    image_section = ""
+    if image_count > 0:
+        image_section = f"""
+  * 본문 안에 이미지 마커를 정확히 {image_count}개 삽입하세요. 각 단계(요약·테이블·FAQ) 사이나 중요 단락 뒤에 배치:
+    <!-- IMAGE: 구체적이고 사실적인 영어 이미지 설명 (예: an infographic comparing different types of Korean insurance plans) -->
+    - 반드시 영어로 작성, 사진처럼 묘사할 것
+    - 주제와 직접 관련된 장면·인포그래픽 묘사
+    - {image_count}개 정확히 삽입 (더 많거나 적으면 안 됨)"""
 
     user_prompt = f"""다음 정보를 바탕으로 AI AEO 최적화 네이버 블로그 글을 작성해주세요.
 
@@ -48,6 +57,6 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str) -> tuple[str,
   2단계) 비교 테이블: <table> 태그로 3-5개 항목 비교
   3단계) FAQ: <h3>Q. 질문</h3><p>답변</p> 형식으로 5개 이상
   * <blockquote>로 핵심 인용구 1개 이상 포함
-  * 전체 1500자 이상"""
+  * 전체 1500자 이상{image_section}"""
 
     return SYSTEM_PROMPT, user_prompt

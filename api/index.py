@@ -36,6 +36,7 @@ def generate():
     sub_keywords = (data.get('sub_keywords') or '').strip()
     method       = data.get('method', 'traditional')
     humanize     = bool(data.get('humanize', False))
+    image_count  = max(0, min(7, int(data.get('image_count', 3))))
 
     if not topic or not main_keyword:
         return jsonify({'error': '주제와 메인 키워드를 입력해주세요.'}), 400
@@ -51,7 +52,7 @@ def generate():
             else:
                 from prompts.aeo import build_prompt
 
-            system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords)
+            system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count)
 
             payload = {
                 'systemInstruction': {'parts': [{'text': system_prompt}]},
