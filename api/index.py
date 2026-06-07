@@ -4,8 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Flask, render_template, request, jsonify, Response
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+import requests as http_req
 import json
 import re
 import asyncio
@@ -17,6 +16,11 @@ load_dotenv()
 
 app = Flask(__name__, template_folder='../templates')
 
+_GEMINI_URL = (
+    'https://generativelanguage.googleapis.com'
+    '/v1/models/gemini-1.5-flash:streamGenerateContent'
+)
+
 
 @app.route('/')
 def index():
@@ -27,11 +31,11 @@ def index():
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.get_json()
-    topic = (data.get('topic') or '').strip()
+    topic        = (data.get('topic') or '').strip()
     main_keyword = (data.get('main_keyword') or '').strip()
     sub_keywords = (data.get('sub_keywords') or '').strip()
-    method = data.get('method', 'traditional')
-    humanize = bool(data.get('humanize', False))
+    method       = data.get('method', 'traditional')
+    humanize     = bool(data.get('humanize', False))
 
     if not topic or not main_keyword:
         return jsonify({'error': '주제와 메인 키워드를 입력해주세요.'}), 400
@@ -49,21 +53,44 @@ def generate():
 
             system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords)
 
-            client = genai.Client(api_key=api_key)
+            payload = {
+                'system_instruction': {'parts': [{'text': system_prompt}]},
+                'contents': [{'role': 'user', 'parts': [{'text': user_prompt}]}],
+                'generationConfig': {'maxOutputTokens': 4096},
+            }
 
             full_text = ''
-            for chunk in client.models.generate_content_stream(
-                model='gemini-2.0-flash',
-                contents=user_prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_prompt,
-                    max_output_tokens=4096,
-                ),
-            ):
-                text = chunk.text if chunk.text else ''
-                if text:
-                    full_text += text
-                    yield f"data: {json.dumps({'chunk': text}, ensure_ascii=False)}\n\n"
+            with http_req.post(
+                _GEMINI_URL,
+                params={'key': api_key, 'alt': 'sse'},
+                json=payload,
+                stream=True,
+                timeout=55,
+            ) as resp:
+                if not resp.ok:
+                    err = resp.text[:600]
+                    yield f"data: {json.dumps({'error': f'{resp.status_code}: {err}'}, ensure_ascii=False)}\n\n"
+                    return
+
+                for line in resp.iter_lines(decode_unicode=True):
+                    if not line or not line.startswith('data:'):
+                        continue
+                    raw = line[5:].strip()
+                    if raw == '[DONE]':
+                        break
+                    try:
+                        chunk = json.loads(raw)
+                        text = (
+                            chunk.get('candidates', [{}])[0]
+                                 .get('content', {})
+                                 .get('parts', [{}])[0]
+                                 .get('text', '')
+                        )
+                        if text:
+                            full_text += text
+                            yield f"data: {json.dumps({'chunk': text}, ensure_ascii=False)}\n\n"
+                    except json.JSONDecodeError:
+                        pass
 
             if humanize:
                 from core.humanizer import apply_persona
@@ -93,7 +120,7 @@ def publish():
 
     data = request.get_json()
     title = (data.get('title') or '').strip()
-    body = (data.get('body') or '').strip()
+    body  = (data.get('body') or '').strip()
 
     if not title or not body:
         return jsonify({'error': '제목과 본문이 없습니다.'}), 400
