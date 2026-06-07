@@ -4,7 +4,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Flask, render_template, request, jsonify, Response
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import json
 import re
 import asyncio
@@ -48,19 +49,17 @@ def generate():
 
             system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords)
 
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(
-                model_name='gemini-1.5-flash',
-                system_instruction=system_prompt,
-            )
+            client = genai.Client(api_key=api_key)
 
             full_text = ''
-            response = model.generate_content(
-                user_prompt,
-                stream=True,
-                generation_config=genai.types.GenerationConfig(max_output_tokens=4096),
-            )
-            for chunk in response:
+            for chunk in client.models.generate_content_stream(
+                model='gemini-2.0-flash',
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=4096,
+                ),
+            ):
                 text = chunk.text if chunk.text else ''
                 if text:
                     full_text += text
