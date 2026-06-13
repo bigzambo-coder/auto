@@ -45,21 +45,20 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
         image_section = f"""
 
 이미지 삽입 규칙 (반드시 정확히 {image_count}개):
-각 <h2> 소제목 바로 아래 또는 핵심 단락 뒤에 아래 형식으로 삽입하세요.
-이미지는 본문 전체에 균등하게 배치하고, 해당 섹션 내용을 시각적으로 표현해야 합니다.
+각 <h2> 소제목 바로 아래 또는 핵심 단락 뒤에 균등하게 배치하세요.
 
-형식:
-<div class="img-placeholder" data-prompt="여기에 영어로 구체적 사진 묘사"></div>
+형식 (data-prompt, data-kr, data-idx 세 속성 모두 필수):
+<div class="img-placeholder" data-prompt="영어로 구체적 사진 묘사" data-kr="한국어로 이미지 설명" data-idx="N"></div>
 
-영어 묘사 규칙:
-- "realistic photo of ..." 또는 "close-up of ..." 형식
-- 주제·섹션과 직접 관련된 장면, 색상·분위기·배경 포함
-- 구체적이고 생생하게
+규칙:
+- data-prompt: "realistic photo of ..." 또는 "close-up of ..." 형식의 영어 묘사 (조명·분위기·색감 포함)
+- data-kr: 한국어로 이미지 내용 설명 (독자가 읽을 수 있는 자연스러운 문장, 예: "따뜻한 카페에서 노트북을 펼치고 여행 계획을 세우는 20대 여성의 모습")
+- data-idx: 이미지 순서 번호 (1부터 시작)
 
 예시:
-<div class="img-placeholder" data-prompt="realistic photo of a steaming bowl of Korean budae jjigae with spam, sausages and ramen noodles in rich red broth, rustic wooden table setting"></div>
+<div class="img-placeholder" data-prompt="realistic photo of a steaming bowl of Korean budae jjigae with spam and ramen noodles in rich red broth, rustic wooden table, warm restaurant lighting" data-kr="뚝배기에 가득 담긴 부대찌개, 스팸과 라면이 어우러진 빨간 국물이 김을 뿜어내는 모습" data-idx="1"></div>
 
-{image_count}개 정확히 삽입 (많거나 적으면 안 됨)"""
+{image_count}개 정확히 삽입"""
 
     user_prompt = f"""아래 정보로 네이버 블로그 글을 작성해주세요.
 

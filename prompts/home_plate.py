@@ -43,15 +43,15 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
         image_section = f"""
 
 이미지 삽입 규칙 (반드시 정확히 {image_count}개):
-감성적 장면 묘사 단락 뒤 또는 핵심 경험 섹션에 아래 형식으로 균등하게 삽입하세요.
+감성적 장면 묘사 단락 뒤 또는 핵심 경험 섹션에 균등하게 삽입하세요.
 
-형식:
-<div class="img-placeholder" data-prompt="여기에 영어로 구체적이고 감성적인 사진 묘사"></div>
+형식 (data-prompt, data-kr, data-idx 세 속성 모두 필수):
+<div class="img-placeholder" data-prompt="영어로 감성적인 사진 묘사" data-kr="한국어로 이미지 설명" data-idx="N"></div>
 
-영어 묘사 규칙:
-- "cozy aesthetic photo of ...", "warm and inviting shot of ..." 등 감성적 형용사 포함
-- 따뜻한 분위기·색감·감성을 표현
-- 주제와 직접 관련된 장면
+규칙:
+- data-prompt: "cozy aesthetic photo of ..." 또는 "warm and inviting shot of ..." 형식의 영어 묘사 (분위기·색감·감성 포함)
+- data-kr: 한국어로 이미지 내용 설명 (독자가 읽을 수 있는 자연스럽고 감성적인 문장)
+- data-idx: 이미지 순서 번호 (1부터 시작)
 
 {image_count}개 정확히 삽입"""
 

@@ -43,15 +43,15 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
         image_section = f"""
 
 이미지 삽입 규칙 (반드시 정확히 {image_count}개):
-핵심 데이터 단락 뒤 또는 비교 테이블 앞뒤에 아래 형식으로 균등하게 삽입하세요.
+핵심 데이터 단락 뒤 또는 비교 테이블 앞뒤에 균등하게 삽입하세요.
 
-형식:
-<div class="img-placeholder" data-prompt="여기에 영어로 구체적 사진/인포그래픽 묘사"></div>
+형식 (data-prompt, data-kr, data-idx 세 속성 모두 필수):
+<div class="img-placeholder" data-prompt="영어로 구체적 사진/인포그래픽 묘사" data-kr="한국어로 이미지 설명" data-idx="N"></div>
 
-영어 묘사 규칙:
-- "realistic photo of ..." 또는 "data visualization of ..." 형식
-- 트렌드·비교·분석 내용을 시각적으로 표현
-- 구체적·시각적으로 묘사
+규칙:
+- data-prompt: "realistic photo of ..." 또는 "data visualization of ..." 형식의 영어 묘사
+- data-kr: 한국어로 이미지 내용 설명 (독자가 읽을 수 있는 자연스러운 문장)
+- data-idx: 이미지 순서 번호 (1부터 시작)
 
 {image_count}개 정확히 삽입"""
 

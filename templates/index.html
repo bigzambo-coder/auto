@@ -91,7 +91,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 #body-output td{padding:8px 12px;border:1px solid var(--border);}
 #body-output ul{padding-left:20px;margin-bottom:10px;}
 #body-output li{margin-bottom:4px;}
-#body-output figure.blog-img{margin:20px 0;text-align:center;}
+.img-marker{color:var(--red);font-weight:700;font-size:.82rem;background:#fff5f5;border:1px solid #fed7d7;border-radius:6px;padding:7px 12px;margin:14px 0 5px;line-height:1.5;}
+#body-output figure.blog-img{margin:6px 0 20px;text-align:center;}
 #body-output figure.blog-img img{max-width:100%;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);}
 #body-output figure.blog-img figcaption{font-size:.74rem;color:var(--muted);margin-top:5px;}
 .hashtag-bar{flex-wrap:wrap;gap:6px;padding:14px 20px;border-top:1px solid var(--border);background:#f8f9fa;display:none;}
@@ -567,15 +568,23 @@ function finishGeneration(fullText,main_keyword,method,humanize){
 }
 
 function injectImages(){
+  let autoIdx=0;
   bodyOut.querySelectorAll('.img-placeholder').forEach(el=>{
     const desc=el.dataset.prompt||'';
     if(!desc){el.remove();return;}
+    autoIdx++;
+    const kr  =el.dataset.kr||'';
+    const idx =el.dataset.idx||autoIdx;
     const seed=Math.floor(Math.random()*999999);
-    const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(desc)}?width=800&height=500&nologo=true&seed=${seed}`;
-    const fig=document.createElement('figure');
-    fig.className='blog-img';
-    fig.innerHTML=`<img src="${url}" alt="${desc}" loading="lazy" onerror="this.parentElement.style.display='none'"><figcaption>AI 생성 이미지</figcaption>`;
-    el.replaceWith(fig);
+    const url =`https://image.pollinations.ai/prompt/${encodeURIComponent(desc)}?width=800&height=500&nologo=true&seed=${seed}`;
+    const wrap=document.createElement('div');
+    const markerText=kr?`이미지${idx}: ${kr}`:`이미지${idx}`;
+    wrap.innerHTML=`<div class="img-marker">[${markerText}]</div>
+      <figure class="blog-img">
+        <img src="${url}" alt="${kr||desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
+        <figcaption>AI 생성 이미지</figcaption>
+      </figure>`;
+    el.replaceWith(wrap);
   });
 }
 
