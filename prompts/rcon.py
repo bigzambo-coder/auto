@@ -66,12 +66,12 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
 RCON 작성 규칙:
 - [제목]: 관련성·참신성 높은 제목, 메인 키워드 포함, 35자 이내
 - [본문]:
-  * 최소 3000자 이상 (길면 길수록 좋음)
+  * 텍스트 본문 최소 4000자 이상 (이미지 placeholder 태그는 글자 수에 포함하지 말 것 — 이미지가 몇 장이든 텍스트 분량은 동일하게 유지)
   * Relevance: 메인 키워드 의도에 맞는 정보를 첫 단락부터 직접 제공
   * Credibility: 수치/통계/날짜/가격 등 구체적 근거 포함, <blockquote>로 핵심 인용 1개 이상
   * Originality: 타 블로그와 다른 독창적 관점·경험 1개 이상
   * Novelty: 최신 트렌드 또는 독자가 놓치기 쉬운 인사이트 포함
-  * <h2> 소제목 4~6개로 구조화, 각 섹션 충분한 분량
+  * <h2> 소제목 4~6개로 구조화, 각 섹션마다 300자 이상 충분한 텍스트 작성
   * 이미지는 반드시 {image_count}개 정확히 삽입 (더 많거나 적으면 절대 안 됨){faq_section}{image_section}"""
 
     return SYSTEM_PROMPT, user_prompt
