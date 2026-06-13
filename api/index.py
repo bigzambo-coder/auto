@@ -193,22 +193,27 @@ def analyze():
 
     humanize_inst = '③ humanize: 인간화 페르소나 적용 분석 (2~3문장)' if humanize else '③ humanize: null'
 
+    humanize_field = '"humanize": "인간화 페르소나 적용 분석 2~3문장"' if humanize else '"humanize": null'
+
     prompt = f"""다음 네이버 블로그 글을 {mn} SEO 관점에서 분석하세요.
 
 제목: {title}
-본문 (일부): {body[:1800]}
+본문 (일부): {body[:1500]}
 
-아래 JSON 형식으로만 응답 (다른 텍스트 없이):
+반드시 아래 JSON만 출력하세요. 마크다운 코드블록(```) 없이 순수 JSON만:
 {{
-  "c_rank": "C-Rank & D.I.A. 관점 분석 2~3문장",
-  "content_quality": "콘텐츠 품질 및 구조 분석 2~3문장",
-  "user_satisfaction": "사용자 만족 신호 분석 2~3문장 (독자 공감 요소, 체류 시간 유도 장치, 댓글·공감 유도 요소 분석)",
-  {'"humanize": "인간화 페르소나 적용 분석 2~3문장"' if humanize else '"humanize": null'}
+  "c_rank": "C-Rank & D.I.A. 관점 분석 2문장",
+  "content_quality": "콘텐츠 품질 및 구조 분석 2문장",
+  "user_satisfaction": "사용자 만족 신호 분석 2문장",
+  {humanize_field}
 }}"""
 
-    text, err = _gemini_call(prompt, 800)
+    text, err = _gemini_call(prompt, 1500)
     if err:
         return jsonify({'error': err}), 500
+
+    # 마크다운 코드블록 제거
+    text = re.sub(r'```(?:json)?\s*', '', text).strip()
     json_match = re.search(r'\{[\s\S]+\}', text)
     if not json_match:
         return jsonify({'error': '분석 파싱 실패'}), 500
@@ -216,7 +221,7 @@ def analyze():
         result = json.loads(json_match.group())
         return jsonify(result)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'JSON 파싱 오류: {str(e)}'}), 500
 
 
 @app.route('/publish', methods=['POST'])
