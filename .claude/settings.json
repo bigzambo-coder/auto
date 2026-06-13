@@ -7,7 +7,8 @@
       "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\������\\\\Documents\\\\project\\\\auto\\\\templates\")",
       "PowerShell(node --version)",
       "PowerShell(npm --version)",
-      "PowerShell(winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --silent)"
+      "PowerShell(winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --silent)",
+      "Bash(git add *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\������"

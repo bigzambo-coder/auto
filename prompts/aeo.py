@@ -26,7 +26,7 @@ HTML 형식:
 (여기에 HTML 본문)"""
 
 
-def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3) -> tuple[str, str]:
+def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3, _include_faq: bool = False) -> tuple[str, str]:
     sub_kw_section = ""
     if sub_keywords and sub_keywords.strip():
         sub_kw_section = f"\n서브키워드: {sub_keywords.strip()}"

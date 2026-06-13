@@ -37,6 +37,7 @@ def generate():
     method       = data.get('method', 'traditional')
     humanize     = bool(data.get('humanize', False))
     image_count  = max(0, min(7, int(data.get('image_count', 3))))
+    include_faq  = bool(data.get('include_faq', False))
 
     if not topic or not main_keyword:
         return jsonify({'error': '주제와 메인 키워드를 입력해주세요.'}), 400
@@ -47,12 +48,23 @@ def generate():
 
     def stream():
         try:
-            if method == 'traditional':
-                from prompts.traditional_seo import build_prompt
-            else:
+            if method == 'rcon':
+                from prompts.rcon import build_prompt
+            elif method == 'aeo':
                 from prompts.aeo import build_prompt
+            elif method == 'insight_edge':
+                from prompts.insight_edge import build_prompt
+            elif method == 'home_plate':
+                from prompts.home_plate import build_prompt
+            else:
+                from prompts.traditional_seo import build_prompt
 
-            system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count)
+            import inspect
+            sig = inspect.signature(build_prompt)
+            if 'include_faq' in sig.parameters:
+                system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count, include_faq)
+            else:
+                system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count)
 
             payload = {
                 'systemInstruction': {'parts': [{'text': system_prompt}]},

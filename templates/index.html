@@ -3,665 +3,571 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>네이버 블로그 자동 발행기</title>
+<title>네이버 블로그 SEO 최적화 도우미</title>
 <style>
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --border: #2d3148;
-    --accent: #4f8ef7;
-    --accent-hover: #3a7ae8;
-    --green: #22c55e;
-    --text: #e2e8f0;
-    --muted: #8892a4;
-    --radius: 12px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    min-height: 100vh;
-    padding: 40px 20px;
-  }
-  .container { max-width: 900px; margin: 0 auto; }
+:root {
+  --green: #1a9b6c;
+  --green-hover: #168a5e;
+  --green-light: #f0fdf8;
+  --green-border: #d0f0e4;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --muted: #718096;
+  --red: #c53030;
+  --shadow: 0 2px 10px rgba(0,0,0,0.08);
+  --radius: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
 
-  header { text-align: center; margin-bottom: 40px; }
-  header h1 { font-size: 2rem; font-weight: 700; }
-  header h1 span { color: var(--accent); }
-  header p { color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+/* ── 헤더 ── */
+.hd{background:var(--green);color:#fff;height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.hd-logo{font-size:1.02rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.hd-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:0.76rem;font-weight:600;display:flex;align-items:center;gap:5px;}
+.hd-badge::before{content:'';width:6px;height:6px;background:#7affb8;border-radius:50%;}
+.hd-right{margin-left:auto;display:flex;gap:8px;}
+.hd-icon{width:34px;height:34px;background:rgba(255,255,255,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.88rem;cursor:pointer;}
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    margin-bottom: 20px;
-  }
-  .section-title {
-    font-size: 0.82rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
+/* ── 레이아웃 ── */
+.layout{max-width:1240px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:1fr 300px;gap:20px;}
 
-  /* ── SEO 방식 선택 ── */
-  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
-  .method-grid > div { display: flex; flex-direction: column; }
-  .method-radio { display: none; }
-  .method-card {
-    flex: 1;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-  }
-  .method-card:hover { border-color: var(--accent); background: rgba(79,142,247,0.04); }
-  .method-radio:checked + .method-card {
-    border-color: var(--accent);
-    background: rgba(79,142,247,0.1);
-  }
-  .method-card .m-badge {
-    display: inline-block;
-    background: rgba(79,142,247,0.2);
-    color: var(--accent);
-    border-radius: 6px;
-    padding: 2px 10px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .method-radio:checked + .method-card .m-badge {
-    background: var(--accent);
-    color: #fff;
-  }
-  .method-card .m-title { font-weight: 700; font-size: 0.97rem; margin-bottom: 8px; }
-  .method-card .m-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.65; }
+/* ── 탭 ── */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden;}
+.tab-btn{padding:14px 8px;font-size:0.88rem;font-weight:600;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green);background:var(--green-light);}
 
-  /* ── 입력 필드 ── */
-  .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: var(--muted);
-    margin-bottom: 7px;
-  }
-  .field label .req { color: var(--accent); margin-left: 2px; }
-  .field input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .field input:focus { border-color: var(--accent); }
-  .field input::placeholder { color: #4a5568; }
-  .field .hint { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+/* ── 폼 카드 ── */
+.card{background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;}
+.card-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;}
 
-  /* ── 인간화 페르소나 ── */
-  .persona-wrap {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    margin-top: 4px;
-  }
-  .persona-wrap:hover { border-color: var(--accent); }
-  .persona-wrap.active { border-color: var(--accent); background: rgba(79,142,247,0.06); }
-  .persona-wrap input[type=checkbox] { display: none; }
-  .persona-check {
-    width: 22px; height: 22px; flex-shrink: 0;
-    border: 2px solid var(--border);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    transition: all 0.2s;
-    margin-top: 1px;
-  }
-  .persona-wrap.active .persona-check { border-color: var(--accent); background: var(--accent); }
-  .persona-text .p-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 4px; }
-  .persona-text .p-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+/* ── SEO 방식 ── */
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.method-btn{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:#fff;color:#4a5568;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;line-height:1.3;}
+.method-btn:hover{border-color:var(--green);color:var(--green);}
+.method-btn.active{border-color:var(--green);color:var(--green);background:var(--green-light);}
+.method-desc{background:var(--green-light);border:1px solid var(--green-border);border-radius:8px;padding:12px 14px;font-size:0.82rem;color:#2d6a4f;line-height:1.65;}
+.method-desc strong{color:var(--green);}
 
-  /* ── 버튼 ── */
-  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .btn {
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .btn-generate { background: var(--accent); color: #fff; }
-  .btn-generate:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79,142,247,0.4); }
-  .btn-publish { background: #16a34a; color: #fff; }
-  .btn-publish:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(34,197,94,0.4); }
-  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+/* ── 입력 필드 ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:0.84rem;font-weight:600;color:#4a5568;margin-bottom:6px;}
+.field .req{color:var(--red);}
+.field input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:0.93rem;outline:none;transition:border-color .2s;background:#fff;color:var(--text);}
+.field input:focus{border-color:var(--green);}
+.field input::placeholder{color:#c0c8d4;}
+.field .hint{font-size:0.75rem;color:var(--muted);margin-top:4px;}
 
-  /* ── 결과 ── */
-  #result-section { display: none; margin-top: 20px; }
-  .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .status-pill {
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    border: 1px solid;
-  }
-  .pill-generating { background: rgba(79,142,247,0.15); color: var(--accent); border-color: rgba(79,142,247,0.4); }
-  .pill-done { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.4); }
-  .copy-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 0.82rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* ── 토글 스위치 ── */
+.toggle-row{display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all .2s;}
+.toggle-row:hover,.toggle-row.on{border-color:var(--green);background:var(--green-light);}
+.toggle-label{font-size:0.88rem;font-weight:600;color:#2d3748;}
+.toggle-wrap{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle-wrap input{display:none;}
+.toggle-track{position:absolute;inset:0;background:#cbd5e0;border-radius:12px;transition:.3s;}
+.toggle-wrap input:checked~.toggle-track{background:var(--green);}
+.toggle-thumb{position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);pointer-events:none;}
+.toggle-wrap input:checked~.toggle-thumb{left:23px;}
 
-  .output-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px; }
-  #title-output {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-    min-height: 50px;
-    outline: none;
-    line-height: 1.5;
-  }
-  #body-output {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    font-size: 0.88rem;
-    line-height: 1.75;
-    min-height: 320px;
-    max-height: 520px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    outline: none;
-  }
-  [contenteditable="true"]:focus { border-color: var(--accent); }
+/* ── 미디어 슬라이더 ── */
+.media-section{background:#f8f9fa;border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;}
+.media-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:14px;}
+.media-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.media-row:last-child{margin-bottom:0;}
+.media-icon{font-size:1rem;width:22px;text-align:center;}
+.range-wrap{flex:1;position:relative;}
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(to right,var(--green) 0%,var(--green) 50%,#e2e8f0 50%,#e2e8f0 100%);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);}
+.media-val{min-width:36px;font-size:0.85rem;font-weight:700;color:#2d3748;text-align:right;}
+.media-no{display:flex;align-items:center;gap:4px;font-size:0.76rem;color:var(--muted);white-space:nowrap;}
+.media-no input{accent-color:var(--green);cursor:pointer;}
 
-  .notice {
-    margin-top: 14px;
-    font-size: 0.78rem;
-    color: var(--muted);
-    text-align: center;
-  }
+/* ── 하단 액션 ── */
+.action-row{display:flex;align-items:center;justify-content:space-between;margin-top:18px;}
+.faq-label{display:flex;align-items:center;gap:7px;font-size:0.85rem;color:#4a5568;cursor:pointer;}
+.faq-label input{accent-color:var(--green);cursor:pointer;width:15px;height:15px;}
+.faq-q{color:var(--red);font-weight:700;}
+.btn-gen{background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:13px 26px;font-size:0.97rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-gen:hover:not(:disabled){background:var(--green-hover);transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,155,108,.35);}
+.btn-gen:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 
-  /* ── 발행 결과 ── */
-  .pub-result {
-    margin-top: 14px;
-    border-radius: 8px;
-    padding: 13px 16px;
-    font-size: 0.88rem;
-    display: none;
-  }
-  .pub-result.ok { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.35); color: var(--green); }
-  .pub-result.fail { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); color: #f87171; }
+/* ── 결과 ── */
+.result-placeholder{text-align:center;padding:60px 20px;color:#c0c8d4;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);}
+.result-placeholder-icon{font-size:2.5rem;margin-bottom:10px;opacity:.6;}
+.result-placeholder p{font-size:.9rem;}
 
-  /* ── 오류 ── */
-  .error-box {
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.35);
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: #f87171;
-    font-size: 0.87rem;
-    margin-top: 12px;
-    display: none;
-  }
+.result-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:none;}
+.res-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.res-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px;}
+#title-output{font-size:1.05rem;font-weight:700;color:var(--text);outline:none;min-height:28px;}
+.res-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.status-pill{border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;}
+.pill-gen{background:#ebf8ff;color:#2b6cb0;}
+.pill-done{background:var(--green-light);color:var(--green);}
+.copy-btn{border:1.5px solid var(--border);background:#fff;color:var(--muted);border-radius:7px;padding:5px 12px;font-size:.8rem;cursor:pointer;transition:all .2s;}
+.copy-btn:hover{border-color:var(--green);color:var(--green);}
+.res-body{padding:16px 20px;}
+#body-output{min-height:320px;max-height:560px;overflow-y:auto;font-size:.88rem;line-height:1.8;outline:none;}
+.res-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.res-notice{font-size:.77rem;color:#c0c8d4;}
+.btn-pub{background:#276749;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-pub:hover:not(:disabled){background:#22543d;}
+.btn-pub:disabled{opacity:.4;cursor:not-allowed;}
+.pub-result{padding:12px 20px;font-size:.86rem;display:none;}
+.pub-result.ok{background:var(--green-light);color:#276749;}
+.pub-result.fail{background:#fff5f5;color:var(--red);}
+.error-box{background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:12px 16px;color:var(--red);font-size:.85rem;margin-top:12px;display:none;}
 
-  /* ── 애니메이션 ── */
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  .cursor::after { content: '▋'; animation: blink 0.75s infinite; color: var(--accent); }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── 사이드바 ── */
+.sidebar-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;position:sticky;top:72px;}
+.sidebar-title{font-size:.88rem;font-weight:700;color:#2d3748;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.sidebar-icon{font-size:1.1rem;}
+.sidebar-ph{text-align:center;padding:28px 10px;color:var(--muted);font-size:.81rem;line-height:1.65;}
+.sidebar-imgs{display:flex;flex-direction:column;gap:10px;}
+.sidebar-img img{width:100%;border-radius:8px;display:block;}
 
-  /* ── 이미지 수 선택 ── */
-  .img-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .img-pill {
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    background: transparent;
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .img-pill:hover { border-color: var(--accent); color: var(--accent); }
-  .img-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* ── 블로그 이미지 ── */
+#body-output figure.blog-img{margin:20px 0;text-align:center;}
+#body-output figure.blog-img img{max-width:100%;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+#body-output figure.blog-img figcaption{font-size:.74rem;color:var(--muted);margin-top:5px;}
 
-  /* ── 생성된 블로그 이미지 ── */
-  #body-output figure.blog-img { margin: 22px 0; text-align: center; }
-  #body-output figure.blog-img img {
-    max-width: 100%;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-  }
-  .img-skeleton {
-    background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 10px;
-    height: 220px;
-    margin: 22px 0;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
+/* ── API 경고 ── */
+.api-warn{background:#fffbeb;border:1px solid #f6d860;border-radius:var(--radius);padding:14px 16px;color:#92400e;font-size:.83rem;margin-bottom:16px;display:none;}
+.api-warn strong{display:block;margin-bottom:3px;}
 
-  /* ── API 키 경고 배너 ── */
-  .api-warning {
-    background: rgba(251,191,36,0.12);
-    border: 1px solid rgba(251,191,36,0.4);
-    border-radius: 10px;
-    padding: 14px 18px;
-    color: #fbbf24;
-    font-size: 0.85rem;
-    margin-bottom: 20px;
-    line-height: 1.6;
-  }
-  .api-warning strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
-  .api-warning code {
-    background: rgba(251,191,36,0.15);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-family: monospace;
-    font-size: 0.82rem;
-  }
+/* ── 스피너/커서 ── */
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.cursor::after{content:'▋';animation:blink .75s infinite;color:var(--green);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-  @media (max-width: 620px) {
-    .method-grid, .two-col, .action-row { grid-template-columns: 1fr; }
-    header h1 { font-size: 1.5rem; }
-  }
+/* ── 반응형 ── */
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar-card{display:none;}
+}
+@media(max-width:580px){
+  .method-grid{grid-template-columns:1fr 1fr;}
+  .action-row{flex-direction:column;gap:12px;}
+  .btn-gen{width:100%;justify-content:center;}
+}
 </style>
 </head>
 <body>
-<div class="container">
 
-  <header>
-    <h1>📝 네이버 블로그 <span>자동 발행기</span></h1>
-    <p>주제와 키워드만 입력하면 SEO 최적화된 블로그 글을 자동으로 생성하고 발행합니다</p>
-  </header>
-
-  {% if not api_key_set %}
-  <div class="api-warning">
-    <strong>⚠️ GEMINI_API_KEY가 설정되지 않았습니다</strong>
-    Vercel 대시보드 → 프로젝트 선택 → <strong>Settings → Environment Variables</strong>에서<br>
-    <code>GEMINI_API_KEY</code> = <code>AI...</code> 를 추가한 후 재배포해주세요.
+<!-- 헤더 -->
+<header class="hd">
+  <div class="hd-logo">✦ 네이버 블로그 SEO 최적화 도우미</div>
+  <div class="hd-badge">Gemini 2.5 Flash</div>
+  <div class="hd-right">
+    <div class="hd-icon">N</div>
+    <div class="hd-icon">🔑</div>
+    <div class="hd-icon">📱</div>
+    <div class="hd-icon">?</div>
   </div>
-  {% endif %}
+</header>
 
-  <!-- STEP 1: SEO 방식 -->
-  <div class="card">
-    <div class="section-title">① SEO 최적화 방식 선택</div>
-    <div class="method-grid">
+<div class="layout">
+  <!-- 메인 패널 -->
+  <main>
 
-      <div>
-        <input type="radio" name="method" id="m-traditional" value="traditional" class="method-radio" checked>
-        <label for="m-traditional" class="method-card">
-          <div class="m-badge">기존방식</div>
-          <div class="m-title">C-Rank / D.I.A.+</div>
-          <div class="m-desc">
-            2025-2026 검색 환경 대응 (C-Rank/D.I.A.+): 키워드 반복보다 <strong style="color:var(--text)">'진정성'</strong>과 <strong style="color:var(--text)">'전문성'</strong>을 최우선으로 합니다. 직접 경험한 후기, 저자 정보 명시, 신뢰할 수 있는 출처 인용을 통해 네이버의 최신 알고리즘 점수를 극대화합니다.
-          </div>
-        </label>
-      </div>
-
-      <div>
-        <input type="radio" name="method" id="m-aeo" value="aeo" class="method-radio">
-        <label for="m-aeo" class="method-card">
-          <div class="m-badge">AI AEO</div>
-          <div class="m-title">AI 브리핑 노출 최적화</div>
-          <div class="m-desc">
-            AI 브리핑 노출 (AEO): <strong style="color:var(--text)">두괄식 요약 → 비교 테이블 → FAQ</strong>의 3단 구성으로 기계가 읽기 쉬운 포맷과 인용구를 사용하여 AI 인식률을 극대화합니다.
-          </div>
-        </label>
-      </div>
-
+    <!-- API 경고 -->
+    {% if not api_key_set %}
+    <div class="api-warn" style="display:block;">
+      <strong>⚠️ GEMINI_API_KEY가 설정되지 않았습니다</strong>
+      Vercel 대시보드 → Settings → Environment Variables에서 <code>GEMINI_API_KEY</code> 를 추가 후 재배포해주세요.
     </div>
-  </div>
+    {% endif %}
 
-  <!-- STEP 2: 키워드 입력 -->
-  <div class="card">
-    <div class="section-title">② 키워드 입력</div>
-
-    <div class="field">
-      <label>주제 <span class="req">*</span></label>
-      <input type="text" id="topic" placeholder="예: 강남 맛집 추천">
+    <!-- 탭 -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="generate">주제로 생성하기</button>
+      <button class="tab-btn" data-tab="trending">인기 제목 추천</button>
+      <button class="tab-btn" data-tab="optimize">기존 글 최적화</button>
     </div>
 
-    <div class="two-col">
-      <div class="field">
-        <label>메인 키워드 <span class="req">*</span></label>
-        <input type="text" id="main-keyword" placeholder="예: 강남 파스타 맛집">
-        <div class="hint">검색 최적화할 핵심 키워드</div>
-      </div>
-      <div class="field">
-        <label>서브키워드</label>
-        <input type="text" id="sub-keywords" placeholder="예: 강남역 이탈리안, 강남 데이트 코스">
-        <div class="hint">선택 입력 · 쉼표(,)로 구분</div>
-      </div>
-    </div>
+    <!-- 탭: 주제로 생성하기 -->
+    <div id="tab-generate">
 
-    <div class="field" style="margin-bottom:0;">
-      <label>이미지 수 <span style="color:var(--muted);font-weight:400;font-size:0.78rem;">AI 자동 생성 · 무료</span></label>
-      <div class="img-pills" id="img-pills">
-        <button type="button" class="img-pill" data-n="0">없음</button>
-        <button type="button" class="img-pill" data-n="1">1장</button>
-        <button type="button" class="img-pill" data-n="2">2장</button>
-        <button type="button" class="img-pill active" data-n="3">3장</button>
-        <button type="button" class="img-pill" data-n="4">4장</button>
-        <button type="button" class="img-pill" data-n="5">5장</button>
-        <button type="button" class="img-pill" data-n="6">6장</button>
-        <button type="button" class="img-pill" data-n="7">7장</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3: 인간화 페르소나 -->
-  <div class="card">
-    <div class="section-title">③ 인간화 페르소나 적용 (AI 탐지 우회)</div>
-    <label class="persona-wrap" id="persona-wrap" onclick="togglePersona()">
-      <input type="checkbox" id="humanize">
-      <div class="persona-check" id="persona-check"></div>
-      <div class="persona-text">
-        <div class="p-title">인간화 페르소나 적용 (AI 탐지 우회)</div>
-        <div class="p-desc">
-          블로그가 AI처럼 작성하지 않고 사람이 쓰는 것처럼 변환합니다.<br>
-          구어체·1인칭 마커(솔직히 말하면, 제 경험으로는…)·자연스러운 전환구를 추가해
-          AI 탐지 도구를 우회하고 사람이 쓴 글처럼 발행됩니다.
+      <!-- SEO 방식 -->
+      <div class="card">
+        <div class="card-title">SEO 최적화 방식 선택</div>
+        <div class="method-grid">
+          <button class="method-btn active" data-method="traditional">기존 방식 (C-Rank/D.I.A.+)</button>
+          <button class="method-btn" data-method="rcon">최신 방식 (RCON)</button>
+          <button class="method-btn" data-method="aeo">AI 브리핑 (AEO)</button>
+          <button class="method-btn" data-method="insight_edge">인사이트 엣지</button>
+          <button class="method-btn" data-method="home_plate">네이버 홈판 (Home-Plate)</button>
         </div>
-      </div>
-    </label>
-  </div>
-
-  <!-- 버튼 -->
-  <div class="action-row">
-    <button class="btn btn-generate" id="generate-btn" disabled>
-      콘텐츠 생성
-    </button>
-    <button class="btn btn-publish" id="publish-btn" disabled>
-      네이버 블로그 발행
-    </button>
-  </div>
-  <div class="error-box" id="error-box"></div>
-
-  <!-- 결과 -->
-  <div id="result-section">
-    <div class="card">
-      <div class="result-header">
-        <div class="section-title" style="margin:0;">생성된 블로그 글</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <span class="status-pill pill-generating" id="status-pill">생성 중...</span>
-          <button class="copy-btn" onclick="copyAll(this)">전체 복사</button>
+        <div class="method-desc" id="method-desc">
+          2025-2026 검색 환경 대응 (C-Rank/D.I.A.+): 키워드 반복보다 <strong>'진정성'</strong>과 <strong>'전문성'</strong>을 최우선으로 합니다. 직접 경험한 후기, 저자 정보 명시, 신뢰할 수 있는 출처 인용을 통해 네이버의 최신 알고리즘 점수를 극대화합니다.
         </div>
       </div>
 
-      <div class="output-label">제목</div>
-      <div id="title-output" contenteditable="true" class="cursor"></div>
+      <!-- 키워드 입력 -->
+      <div class="card">
+        <div class="field">
+          <label>주제</label>
+          <input type="text" id="topic" placeholder="예: 서울 근교 당일치기 여행 코스 추천">
+        </div>
+        <div class="field">
+          <label>메인 키워드 <span class="req">*</span></label>
+          <input type="text" id="main-keyword" placeholder="예: 당일치기 여행">
+          <div class="hint">검색 최적화할 핵심 키워드</div>
+        </div>
+        <div class="field">
+          <label>서브 키워드 <span style="color:var(--muted);font-weight:400;">(선택, 쉼표로 구분)</span></label>
+          <input type="text" id="sub-keywords" placeholder="예: 서울 근교 드라이브, 서울 근교 가볼만한곳">
+        </div>
+      </div>
 
-      <div class="output-label">본문</div>
-      <div id="body-output" contenteditable="true" class="cursor"></div>
+      <!-- 인간화 페르소나 -->
+      <div class="card">
+        <div class="toggle-row" id="persona-row" onclick="togglePersona()">
+          <div>
+            <div class="toggle-label">인간화 페르소나 적용 (AI 탐지 우회)</div>
+            <div style="font-size:.79rem;color:var(--muted);margin-top:3px;">구어체·1인칭 마커 추가로 AI 탐지 도구를 우회합니다</div>
+          </div>
+          <label class="toggle-wrap" onclick="event.stopPropagation()">
+            <input type="checkbox" id="humanize" onchange="togglePersona()">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+      </div>
 
-      <div class="notice">제목·본문을 직접 수정한 후 발행할 수 있습니다</div>
-      <div class="pub-result" id="pub-result"></div>
+      <!-- 멀티미디어 생성 -->
+      <div class="card">
+        <div class="media-section">
+          <div class="media-title">멀티미디어 생성</div>
+
+          <div class="media-row">
+            <span class="media-icon">🖼️</span>
+            <span style="font-size:.84rem;font-weight:600;color:#4a5568;min-width:36px;">이미지</span>
+            <div class="range-wrap">
+              <input type="range" id="img-range" min="0" max="7" value="3" oninput="updateRange(this,'img-val')">
+            </div>
+            <span class="media-val"><span id="img-val">3</span>장</span>
+            <label class="media-no"><input type="checkbox" id="img-none" onchange="setZero('img-range','img-val',this)"> 미생성</label>
+          </div>
+
+          <div class="media-row">
+            <span class="media-icon">🎬</span>
+            <span style="font-size:.84rem;font-weight:600;color:#4a5568;min-width:36px;">동영상</span>
+            <div class="range-wrap">
+              <input type="range" id="vid-range" min="0" max="3" value="0" oninput="updateRange(this,'vid-val')">
+            </div>
+            <span class="media-val"><span id="vid-val">0</span>개</span>
+            <label class="media-no"><input type="checkbox" id="vid-none" checked onchange="setZero('vid-range','vid-val',this)"> 미생성</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ + 생성 버튼 -->
+      <div class="action-row">
+        <label class="faq-label">
+          <input type="checkbox" id="include-faq">
+          <span class="faq-q">?</span> FAQ 포함 <span style="color:var(--muted);font-size:.78rem;">(자주 묻는 질문 섹션)</span>
+        </label>
+        <button class="btn-gen" id="gen-btn" disabled>
+          ✦ 최적화 글 생성하기
+        </button>
+      </div>
+
+      <div class="error-box" id="error-box"></div>
+
+      <!-- 결과 영역 -->
+      <div style="margin-top:20px;">
+        <div class="result-placeholder" id="result-ph">
+          <div class="result-placeholder-icon">✏️</div>
+          <p>결과가 여기에 표시됩니다.</p>
+        </div>
+
+        <div class="result-card" id="result-card">
+          <div class="res-head">
+            <div style="flex:1;">
+              <div class="res-label">제목</div>
+              <div id="title-output" contenteditable="true" class="cursor"></div>
+            </div>
+            <div class="res-actions">
+              <span class="status-pill pill-gen" id="status-pill">생성 중...</span>
+              <button class="copy-btn" onclick="copyAll(this)">전체 복사</button>
+            </div>
+          </div>
+          <div class="res-body">
+            <div class="res-label">본문</div>
+            <div id="body-output" contenteditable="true" class="cursor"></div>
+          </div>
+          <div class="res-foot">
+            <span class="res-notice">제목·본문을 직접 수정한 후 발행할 수 있습니다</span>
+            <button class="btn-pub" id="pub-btn" disabled onclick="publish()">네이버 블로그 발행</button>
+          </div>
+          <div class="pub-result" id="pub-result"></div>
+        </div>
+      </div>
+    </div><!-- /tab-generate -->
+
+    <!-- 탭: 인기 제목 추천 -->
+    <div id="tab-trending" style="display:none;">
+      <div class="result-placeholder">
+        <div class="result-placeholder-icon">🔥</div>
+        <p>인기 제목 추천 기능 준비 중입니다.</p>
+      </div>
     </div>
-  </div>
 
+    <!-- 탭: 기존 글 최적화 -->
+    <div id="tab-optimize" style="display:none;">
+      <div class="result-placeholder">
+        <div class="result-placeholder-icon">⚡</div>
+        <p>기존 글 최적화 기능 준비 중입니다.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 사이드바 -->
+  <aside>
+    <div class="sidebar-card">
+      <div class="sidebar-title"><span class="sidebar-icon">🖼️</span> 미디어 생성</div>
+      <div id="sidebar-content">
+        <div class="sidebar-ph">블로그 글을 생성하면 본문에 맞는 이미지 및 동영상 생성기가 여기에 나타납니다.</div>
+      </div>
+    </div>
+  </aside>
 </div>
+
 <script>
-  // 이미지 수 선택 pill
-  document.querySelectorAll('.img-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.img-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
+const METHOD_DESCS = {
+  traditional: '2025-2026 검색 환경 대응 (C-Rank/D.I.A.+): 키워드 반복보다 <strong>\'진정성\'</strong>과 <strong>\'전문성\'</strong>을 최우선으로 합니다. 직접 경험한 후기, 저자 정보 명시, 신뢰할 수 있는 출처 인용을 통해 네이버의 최신 알고리즘 점수를 극대화합니다.',
+  rcon: '관련성(Relevance)·신뢰성(Credibility)·독창성(Originality)·참신성(Novelty) 4가지 지표를 균형 있게 최적화합니다. 전문가 인용, 데이터 기반 근거, 독창적 관점으로 최신 검색 알고리즘을 공략합니다.',
+  aeo: 'AI 브리핑 노출 (AEO): <strong>두괄식 요약 → 비교 테이블 → FAQ</strong>의 3단 구성으로 기계가 읽기 쉬운 포맷과 인용구를 사용하여 AI 인식률을 극대화합니다.',
+  insight_edge: '실시간 트렌드와 검색 데이터 기반으로 \'지금 이 순간\' 독자가 가장 궁금해하는 정보를 선제적으로 제공합니다. 시의성 있는 데이터·비교 분석으로 정보 우위를 선점합니다.',
+  home_plate: '네이버 메인 홈판 노출을 타겟으로 개인화 추천 알고리즘에 최적화된 주제·구조·키워드를 사용합니다. 독자의 감성과 관심사에 맞는 스토리텔링으로 클릭률을 극대화합니다.'
+};
+
+// 탭
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ['generate','trending','optimize'].forEach(t => {
+      document.getElementById('tab-'+t).style.display = btn.dataset.tab === t ? '' : 'none';
     });
   });
-  function getImgCount() {
-    return parseInt(document.querySelector('.img-pill.active')?.dataset.n ?? 3);
-  }
+});
 
-  const topicEl   = document.getElementById('topic');
-  const kwEl      = document.getElementById('main-keyword');
-  const genBtn    = document.getElementById('generate-btn');
-  const pubBtn    = document.getElementById('publish-btn');
-  const errorBox  = document.getElementById('error-box');
-  const resultSec = document.getElementById('result-section');
-  const titleOut  = document.getElementById('title-output');
-  const bodyOut   = document.getElementById('body-output');
-  const statusPill= document.getElementById('status-pill');
-  const pubResult = document.getElementById('pub-result');
+// SEO 방식
+document.querySelectorAll('.method-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('method-desc').innerHTML = METHOD_DESCS[btn.dataset.method] || '';
+  });
+});
+function getMethod(){ return document.querySelector('.method-btn.active')?.dataset.method || 'traditional'; }
 
-  // 버튼 활성화
-  [topicEl, kwEl].forEach(el => el.addEventListener('input', () => {
-    genBtn.disabled = !(topicEl.value.trim() && kwEl.value.trim());
-  }));
+// 토글 페르소나
+function togglePersona() {
+  const cb = document.getElementById('humanize');
+  const row = document.getElementById('persona-row');
+  // checkbox 상태 반영 (label onclick 처리)
+  row.classList.toggle('on', cb.checked);
+}
 
-  // 인간화 체크박스 토글
-  function togglePersona() {
-    const cb   = document.getElementById('humanize');
-    const wrap = document.getElementById('persona-wrap');
-    const chk  = document.getElementById('persona-check');
-    cb.checked = !cb.checked;
-    wrap.classList.toggle('active', cb.checked);
-    chk.textContent = cb.checked ? '✓' : '';
-  }
+// 슬라이더
+function updateRange(el, valId) {
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = `linear-gradient(to right, var(--green) ${pct}%, #e2e8f0 ${pct}%)`;
+  document.getElementById(valId).textContent = el.value;
+  if (valId === 'img-val') document.getElementById('img-none').checked = el.value == 0;
+  if (valId === 'vid-val') document.getElementById('vid-none').checked = el.value == 0;
+}
+function setZero(rangeId, valId, cb) {
+  const el = document.getElementById(rangeId);
+  if (cb.checked) { el.value = 0; }
+  updateRange(el, valId);
+}
+// 초기 슬라이더 색 설정
+updateRange(document.getElementById('img-range'), 'img-val');
+updateRange(document.getElementById('vid-range'), 'vid-val');
 
-  genBtn.addEventListener('click', generate);
-  pubBtn.addEventListener('click', publish);
+// 생성 버튼 활성화
+const topicEl = document.getElementById('topic');
+const kwEl    = document.getElementById('main-keyword');
+const genBtn  = document.getElementById('gen-btn');
+[topicEl, kwEl].forEach(el => el.addEventListener('input', () => {
+  genBtn.disabled = !(topicEl.value.trim() && kwEl.value.trim());
+}));
 
-  async function generate() {
-    const topic        = topicEl.value.trim();
-    const main_keyword = kwEl.value.trim();
-    const sub_keywords = document.getElementById('sub-keywords').value.trim();
-    const method       = document.querySelector('input[name=method]:checked').value;
-    const humanize     = document.getElementById('humanize').checked;
-    const image_count  = getImgCount();
+const titleOut  = document.getElementById('title-output');
+const bodyOut   = document.getElementById('body-output');
+const statusPill= document.getElementById('status-pill');
+const errorBox  = document.getElementById('error-box');
+const resultPh  = document.getElementById('result-ph');
+const resultCard= document.getElementById('result-card');
+const pubBtn    = document.getElementById('pub-btn');
+const pubResult = document.getElementById('pub-result');
+const sidebarContent = document.getElementById('sidebar-content');
 
-    // 초기화
-    errorBox.style.display = 'none';
-    pubResult.style.display = 'none';
-    resultSec.style.display = 'block';
-    titleOut.textContent = '';
-    bodyOut.textContent  = '';
-    titleOut.classList.add('cursor');
-    bodyOut.classList.add('cursor');
-    pubBtn.disabled = true;
+genBtn.addEventListener('click', generate);
 
-    statusPill.textContent = '생성 중...';
-    statusPill.className   = 'status-pill pill-generating';
+async function generate() {
+  const topic        = topicEl.value.trim();
+  const main_keyword = kwEl.value.trim();
+  const sub_keywords = document.getElementById('sub-keywords').value.trim();
+  const method       = getMethod();
+  const humanize     = document.getElementById('humanize').checked;
+  const image_count  = parseInt(document.getElementById('img-range').value);
+  const include_faq  = document.getElementById('include-faq').checked;
 
-    genBtn.disabled = true;
-    genBtn.innerHTML = '<span class="spinner"></span>생성 중...';
+  errorBox.style.display = 'none';
+  pubResult.style.display = 'none';
+  resultPh.style.display  = 'none';
+  resultCard.style.display = 'block';
+  titleOut.textContent = '';
+  bodyOut.textContent  = '';
+  titleOut.classList.add('cursor');
+  bodyOut.classList.add('cursor');
+  pubBtn.disabled = true;
+  statusPill.textContent = '생성 중...';
+  statusPill.className = 'status-pill pill-gen';
+  genBtn.disabled = true;
+  genBtn.innerHTML = '<span class="spinner"></span>생성 중...';
 
-    let fullText = '';
-
-    try {
-      const res = await fetch('/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, main_keyword, sub_keywords, method, humanize, image_count })
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        showError(errData.error || `서버 오류가 발생했습니다. (${res.status})`);
-        return;
-      }
-
-      const reader  = res.body.getReader();
-      const decoder = new TextDecoder();
-      let   buffer  = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const data = JSON.parse(line.slice(6));
-
-          if (data.error)  { showError(data.error); return; }
-
-          if (data.chunk) {
-            fullText += data.chunk;
-            renderOutput(fullText);
-          }
-
-          if (data.humanized_body) {
-            const m = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
-            titleOut.textContent = m ? m[1].trim() : '';
-            bodyOut.innerHTML    = data.humanized_body;
-            injectImages();
-          }
-
-          if (data.done) {
-            injectImages();
-            titleOut.classList.remove('cursor');
-            bodyOut.classList.remove('cursor');
-            statusPill.textContent = '생성 완료 ✓';
-            statusPill.className   = 'status-pill pill-done';
-            pubBtn.disabled = false;
-          }
+  let fullText = '';
+  try {
+    const res = await fetch('/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({topic, main_keyword, sub_keywords, method, humanize, image_count, include_faq})
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      showError(e.error || `서버 오류 (${res.status})`);
+      return;
+    }
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let   buffer  = '';
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = JSON.parse(line.slice(6));
+        if (data.error)  { showError(data.error); return; }
+        if (data.chunk)  { fullText += data.chunk; renderOutput(fullText); }
+        if (data.humanized_body) {
+          const m = fullText.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\])/);
+          titleOut.textContent = m ? m[1].trim() : '';
+          bodyOut.innerHTML    = data.humanized_body;
+          injectImages();
+          updateSidebar();
+        }
+        if (data.done) {
+          injectImages();
+          updateSidebar();
+          titleOut.classList.remove('cursor');
+          bodyOut.classList.remove('cursor');
+          statusPill.textContent = '생성 완료 ✓';
+          statusPill.className   = 'status-pill pill-done';
+          pubBtn.disabled = false;
         }
       }
-    } catch (e) {
-      showError('오류가 발생했습니다: ' + e.message);
-    } finally {
-      genBtn.disabled  = false;
-      genBtn.textContent = '다시 생성';
     }
+  } catch(e) {
+    showError('오류: ' + e.message);
+  } finally {
+    genBtn.disabled   = false;
+    genBtn.innerHTML  = '✦ 다시 생성하기';
   }
+}
 
-  async function publish() {
-    const title = titleOut.innerText.trim();
-    const body  = bodyOut.innerText.trim();
-    if (!title || !body) { showError('콘텐츠를 먼저 생성해주세요.'); return; }
+function renderOutput(text) {
+  const tm = text.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\]|$)/);
+  const bm = text.match(/\[본문\]\s*\n([\s\S]+)/);
+  titleOut.textContent = tm ? tm[1].trim() : '';
+  bodyOut.innerHTML    = bm ? bm[1].trim() : text;
+  bodyOut.scrollTop    = bodyOut.scrollHeight;
+}
 
-    pubBtn.disabled  = true;
-    pubBtn.innerHTML = '<span class="spinner"></span>발행 준비 중...';
-    pubResult.style.display = 'none';
+function injectImages() {
+  bodyOut.querySelectorAll('.img-placeholder').forEach(el => {
+    const desc = el.dataset.prompt || '';
+    if (!desc) { el.remove(); return; }
+    const seed = Math.floor(Math.random() * 999999);
+    const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(desc)}?width=800&height=500&nologo=true&seed=${seed}`;
+    const fig  = document.createElement('figure');
+    fig.className = 'blog-img';
+    fig.innerHTML = `<img src="${url}" alt="${desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <figcaption>AI 생성 이미지</figcaption>`;
+    el.replaceWith(fig);
+  });
+}
 
-    try {
-      const res  = await fetch('/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body })
-      });
-      const data = await res.json();
+function updateSidebar() {
+  const imgs = bodyOut.querySelectorAll('figure.blog-img img');
+  if (!imgs.length) return;
+  sidebarContent.innerHTML = '<div class="sidebar-imgs"></div>';
+  const wrap = sidebarContent.querySelector('.sidebar-imgs');
+  imgs.forEach(img => {
+    const div = document.createElement('div');
+    div.className = 'sidebar-img';
+    const clone = document.createElement('img');
+    clone.src = img.src; clone.alt = img.alt;
+    clone.onerror = () => div.style.display = 'none';
+    div.appendChild(clone);
+    wrap.appendChild(div);
+  });
+}
 
-      if (data.url) {
-        pubResult.style.display = 'block';
-        pubResult.className = 'pub-result ok';
-        pubResult.innerHTML = `✅ 발행 완료! → <a href="${data.url}" target="_blank" style="color:inherit;text-decoration:underline;">${data.url}</a>`;
-      } else {
-        // Playwright 없는 환경 → 반자동 발행
-        await semiAutoPublish(title, body);
-      }
-    } catch (e) {
-      await semiAutoPublish(title, body);
-    } finally {
-      pubBtn.disabled    = false;
-      pubBtn.textContent = '네이버 블로그 발행';
-    }
+function showError(msg) {
+  errorBox.textContent   = msg;
+  errorBox.style.display = 'block';
+  resultPh.style.display  = 'block';
+  resultCard.style.display = 'none';
+}
+
+async function publish() {
+  const title = titleOut.innerText.trim();
+  const body  = bodyOut.innerText.trim();
+  if (!title || !body) { showError('콘텐츠를 먼저 생성해주세요.'); return; }
+  pubBtn.disabled  = true;
+  pubBtn.innerHTML = '<span class="spinner" style="border-top-color:#fff"></span>';
+  pubResult.style.display = 'none';
+  try {
+    const res  = await fetch('/publish', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title,body})});
+    const data = await res.json();
+    if (data.url) {
+      pubResult.style.display = 'block';
+      pubResult.className = 'pub-result ok';
+      pubResult.innerHTML = `✅ 발행 완료! → <a href="${data.url}" target="_blank" style="color:inherit;text-decoration:underline;">${data.url}</a>`;
+    } else { await semiAutoPublish(title, body); }
+  } catch(e) { await semiAutoPublish(title, body); }
+  finally {
+    pubBtn.disabled  = false;
+    pubBtn.textContent = '네이버 블로그 발행';
   }
+}
 
-  async function semiAutoPublish(title, body) {
-    try {
-      await navigator.clipboard.writeText(body);
-    } catch (e) { /* 클립보드 권한 없으면 무시 */ }
+async function semiAutoPublish(title, body) {
+  try { await navigator.clipboard.writeText(body); } catch(e){}
+  window.open('https://blog.naver.com/PostWrite.nhn','_blank');
+  pubResult.style.display = 'block';
+  pubResult.className = 'pub-result ok';
+  pubResult.innerHTML = `<strong>📋 네이버 에디터가 새 탭에서 열렸습니다</strong><br>
+    <span style="font-size:.81rem;">① 제목 입력: <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;">${title.replace(/</g,'&lt;')}</code><br>
+    ② 본문 클릭 후 <strong>Ctrl+V</strong> 붙여넣기 → 발행</span>`;
+}
 
-    window.open('https://blog.naver.com/PostWrite.nhn', '_blank');
-
-    pubResult.style.display = 'block';
-    pubResult.className = 'pub-result ok';
-    pubResult.innerHTML = `
-      <div style="margin-bottom:8px;font-weight:700;">📋 네이버 에디터가 새 탭에서 열렸습니다</div>
-      <div style="font-size:0.82rem;line-height:1.8;opacity:0.9;">
-        ① 제목 입력란에 아래 제목을 복사·붙여넣기<br>
-        <span style="background:rgba(34,197,94,0.15);border-radius:4px;padding:2px 8px;font-family:monospace;">${title.replace(/</g,'&lt;')}</span><br>
-        ② 본문 영역 클릭 후 <strong>Ctrl+V</strong> (본문이 클립보드에 복사됨)<br>
-        ③ 발행 버튼 클릭
-      </div>`;
-  }
-
-  function injectImages() {
-    bodyOut.querySelectorAll('.img-placeholder').forEach(el => {
-      const desc = el.dataset.prompt || '';
-      if (!desc) { el.remove(); return; }
-      const seed = Math.floor(Math.random() * 999999);
-      const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(desc)}?width=800&height=500&nologo=true&seed=${seed}`;
-      const fig  = document.createElement('figure');
-      fig.className = 'blog-img';
-      fig.innerHTML = `<img src="${url}" alt="${desc}" loading="lazy"
-          onerror="this.parentElement.style.display='none'">
-        <figcaption style="font-size:0.75rem;color:var(--muted);margin-top:6px;">AI 생성 이미지</figcaption>`;
-      el.replaceWith(fig);
-    });
-  }
-
-  function renderOutput(text) {
-    const tm = text.match(/\[제목\]\s*\n([\s\S]+?)(?=\n\[본문\]|$)/);
-    const bm = text.match(/\[본문\]\s*\n([\s\S]+)/);
-    titleOut.textContent = tm ? tm[1].trim() : '';
-    bodyOut.innerHTML    = bm ? bm[1].trim() : text;
-    bodyOut.scrollTop = bodyOut.scrollHeight;
-  }
-
-  function showError(msg) {
-    errorBox.textContent    = msg;
-    errorBox.style.display  = 'block';
-    resultSec.style.display = 'none';
-  }
-
-  function copyAll(btn) {
-    const text = titleOut.innerText + '\n\n' + bodyOut.innerText;
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '복사됨 ✓';
-      setTimeout(() => btn.textContent = '전체 복사', 2000);
-    });
-  }
+function copyAll(btn) {
+  navigator.clipboard.writeText(titleOut.innerText + '\n\n' + bodyOut.innerText)
+    .then(() => { btn.textContent = '복사됨 ✓'; setTimeout(() => btn.textContent = '전체 복사', 2000); });
+}
 </script>
 </body>
 </html>
