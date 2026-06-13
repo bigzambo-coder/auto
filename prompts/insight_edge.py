@@ -25,13 +25,18 @@ HTML 형식:
 (여기에 제목)
 
 [본문]
-(여기에 HTML 본문)"""
+(여기에 HTML 본문)
+
+[해시태그]
+#태그1 #태그2 ... (메인키워드 포함 9~12개, 공백으로 구분)"""
 
 
-def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3, include_faq: bool = False) -> tuple[str, str]:
+def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3, include_faq: bool = False, user_experience: str = '') -> tuple[str, str]:
     sub_kw_section = ""
     if sub_keywords and sub_keywords.strip():
         sub_kw_section = f"\n서브키워드: {sub_keywords.strip()}"
+
+    exp_section = f"\n\n사용자 실제 경험 (반드시 본문에 자연스럽게 녹여주세요):\n{user_experience.strip()}" if user_experience and user_experience.strip() else ""
 
     image_section = ""
     if image_count > 0:
@@ -57,7 +62,7 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
     user_prompt = f"""아래 정보로 인사이트 엣지 전략의 네이버 블로그 글을 작성해주세요.
 
 주제: {topic}
-메인 키워드: {main_keyword}{sub_kw_section}
+메인 키워드: {main_keyword}{sub_kw_section}{exp_section}
 
 인사이트 엣지 작성 규칙:
 - [제목]: "2025 최신", "몰랐던", "비교 분석" 등 시의성·정보 우위 표현 활용, 메인 키워드 포함, 35자 이내

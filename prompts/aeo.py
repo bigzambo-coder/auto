@@ -23,7 +23,10 @@ HTML 형식:
 (여기에 제목)
 
 [본문]
-(여기에 HTML 본문)"""
+(여기에 HTML 본문)
+
+[해시태그]
+#태그1 #태그2 ... (메인키워드 포함 9~12개, 공백으로 구분)"""
 
 
 def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: int = 3, _include_faq: bool = False) -> tuple[str, str]:

@@ -46,6 +46,8 @@ def generate():
     if not api_key:
         return jsonify({'error': 'GEMINI_API_KEY가 설정되지 않았습니다.'}), 500
 
+    user_experience = (data.get('user_experience') or '').strip()
+
     def stream():
         try:
             if method == 'rcon':
@@ -61,10 +63,12 @@ def generate():
 
             import inspect
             sig = inspect.signature(build_prompt)
+            kwargs = {}
             if 'include_faq' in sig.parameters:
-                system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count, include_faq)
-            else:
-                system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count)
+                kwargs['include_faq'] = include_faq
+            if 'user_experience' in sig.parameters:
+                kwargs['user_experience'] = user_experience
+            system_prompt, user_prompt = build_prompt(topic, main_keyword, sub_keywords, image_count, **kwargs)
 
             payload = {
                 'systemInstruction': {'parts': [{'text': system_prompt}]},
@@ -123,6 +127,88 @@ def generate():
         mimetype='text/event-stream',
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'},
     )
+
+
+_GEMINI_SIMPLE_URL = (
+    'https://generativelanguage.googleapis.com'
+    '/v1beta/models/gemini-2.5-flash:generateContent'
+)
+
+def _gemini_call(prompt_text, max_tokens=512):
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        return None, 'GEMINI_API_KEY 없음'
+    payload = {
+        'contents': [{'role': 'user', 'parts': [{'text': prompt_text}]}],
+        'generationConfig': {'maxOutputTokens': max_tokens},
+    }
+    resp = http_req.post(_GEMINI_SIMPLE_URL, params={'key': api_key}, json=payload, timeout=25)
+    resp.encoding = 'utf-8'
+    if not resp.ok:
+        return None, resp.text[:300]
+    data = resp.json()
+    text = data['candidates'][0]['content']['parts'][0]['text']
+    return text, None
+
+
+@app.route('/suggest_experience', methods=['POST'])
+def suggest_experience():
+    data = request.get_json()
+    topic        = (data.get('topic') or '').strip()
+    main_keyword = (data.get('main_keyword') or '').strip()
+    prompt = f"""주제 '{topic}', 키워드 '{main_keyword}'로 네이버 블로그를 작성하려 합니다.
+블로거가 실제 경험했을 법한 구체적이고 자연스러운 개인 경험담을 3~5문장으로 작성해주세요.
+- 1인칭 구어체 ("저는", "제가", "솔직히" 포함)
+- 구체적 날짜/장소/감정/에피소드 포함
+- 설명 없이 경험담 본문만 출력"""
+    text, err = _gemini_call(prompt, 400)
+    if err:
+        return jsonify({'error': err}), 500
+    return jsonify({'experience': text})
+
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    data   = request.get_json()
+    title  = (data.get('title') or '').strip()
+    body   = (data.get('body') or '').strip()
+    method = data.get('method', 'traditional')
+    humanize = bool(data.get('humanize', False))
+
+    method_names = {
+        'traditional': 'C-Rank/D.I.A.+',
+        'rcon': 'RCON',
+        'aeo': 'AEO',
+        'insight_edge': '인사이트 엣지',
+        'home_plate': '네이버 홈판',
+    }
+    mn = method_names.get(method, 'C-Rank/D.I.A.+')
+
+    humanize_inst = '③ humanize: 인간화 페르소나 적용 분석 (2~3문장)' if humanize else '③ humanize: null'
+
+    prompt = f"""다음 네이버 블로그 글을 {mn} SEO 관점에서 분석하세요.
+
+제목: {title}
+본문 (일부): {body[:1800]}
+
+아래 JSON 형식으로만 응답 (다른 텍스트 없이):
+{{
+  "c_rank": "C-Rank & D.I.A. 관점 분석 2~3문장",
+  "content_quality": "콘텐츠 품질 및 구조 분석 2~3문장",
+  {'"humanize": "인간화 페르소나 적용 분석 2~3문장"' if humanize else '"humanize": null'}
+}}"""
+
+    text, err = _gemini_call(prompt, 800)
+    if err:
+        return jsonify({'error': err}), 500
+    json_match = re.search(r'\{[\s\S]+\}', text)
+    if not json_match:
+        return jsonify({'error': '분석 파싱 실패'}), 500
+    try:
+        result = json.loads(json_match.group())
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/publish', methods=['POST'])
