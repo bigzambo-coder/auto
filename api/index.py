@@ -168,7 +168,7 @@ def suggest_experience():
 - 결과적 만족·아쉬운 점 (솔직하게, 단점도 포함)
 - 독자가 공감하고 몰입할 수 있는 생생한 묘사
 - 설명 없이 경험담 본문만 출력 (제목·소제목 없이 자연스럽게 이어지는 글)"""
-    text, err = _gemini_call(prompt, 1000)
+    text, err = _gemini_call(prompt, 2000)
     if err:
         return jsonify({'error': err}), 500
     return jsonify({'experience': text})
