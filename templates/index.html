@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .field input:focus{border-color:var(--green);}
 .field input::placeholder{color:#c0c8d4;}
 .field .hint{font-size:.75rem;color:var(--muted);margin-top:4px;}
-.exp-textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.86rem;outline:none;transition:border-color .2s;background:#fff;color:var(--text);font-family:inherit;resize:vertical;min-height:80px;}
+.exp-textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.86rem;outline:none;transition:border-color .2s;background:#fff;color:var(--text);font-family:inherit;resize:vertical;min-height:130px;line-height:1.7;}
 .exp-textarea:focus{border-color:var(--green);}
 .exp-textarea::placeholder{color:#c0c8d4;}
 .toggle-row{display:flex;justify-content:space-between;align-items:flex-start;background:#f8f9fa;border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .2s;}
@@ -48,9 +48,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .persona-extra{margin-top:14px;padding-top:14px;border-top:1px dashed var(--green-border);}
 .lbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .lbl-row label{font-size:.84rem;font-weight:600;color:#4a5568;}
-.suggest-btn{background:transparent;border:1.5px solid var(--green);color:var(--green);border-radius:20px;padding:4px 12px;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.suggest-btn{background:transparent;border:1.5px solid var(--green);color:var(--green);border-radius:20px;padding:5px 14px;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
 .suggest-btn:hover:not(:disabled){background:var(--green);color:#fff;}
 .suggest-btn:disabled{opacity:.4;cursor:not-allowed;}
+.suggest-btn .btn-star{color:var(--green);font-size:.8rem;transition:color .2s;}
+.suggest-btn:hover:not(:disabled) .btn-star{color:#fff;}
 .media-section{background:#f8f9fa;border:1.5px solid var(--border);border-radius:var(--r);padding:16px;}
 .media-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:14px;}
 .media-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -223,7 +225,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
           <div class="persona-extra" id="persona-extra" style="display:none;" onclick="event.stopPropagation()">
             <div class="lbl-row">
               <label>사용자 경험 <span style="color:var(--muted);font-weight:400;">(선택)</span></label>
-              <button class="suggest-btn" id="suggest-btn" onclick="suggestExperience()">✨ AI 경험 제안받기</button>
+              <button class="suggest-btn" id="suggest-btn" onclick="suggestExperience()"><span class="btn-star">✦</span> AI 경험 제안받기</button>
             </div>
             <textarea class="exp-textarea" id="user-experience" rows="4"
               placeholder="본문에 녹여낼 실제 경험, 감정, 에피소드 등을 자유롭게 적어주세요. (예: 처음엔 별로였는데 쓰다보니 좋았다, 비가 오는 날 방문했다 등)"></textarea>
@@ -422,6 +424,10 @@ function updatePersonaUI(){
   document.getElementById('persona-extra').style.display=on?'block':'none';
 }
 
+// textarea 자동 높이 조절
+function autoResize(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
+document.getElementById('user-experience').addEventListener('input',function(){autoResize(this);});
+
 async function suggestExperience(){
   const topic=document.getElementById('topic').value.trim();
   const kw=document.getElementById('main-keyword').value.trim();
@@ -431,10 +437,13 @@ async function suggestExperience(){
   try{
     const res=await fetch('/suggest_experience',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,main_keyword:kw})});
     const data=await res.json();
-    if(data.experience) document.getElementById('user-experience').value=data.experience;
-    else if(data.error) alert('오류: '+data.error);
+    if(data.experience){
+      const ta=document.getElementById('user-experience');
+      ta.value=data.experience;
+      autoResize(ta);
+    } else if(data.error) alert('오류: '+data.error);
   }catch(e){alert('요청 실패: '+e.message);}
-  finally{btn.disabled=false;btn.innerHTML='✨ AI 경험 제안받기';}
+  finally{btn.disabled=false;btn.innerHTML='<span class="btn-star">✦</span> AI 경험 제안받기';}
 }
 
 function updateRange(el,valId){
