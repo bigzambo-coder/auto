@@ -195,6 +195,7 @@ def analyze():
 {{
   "c_rank": "C-Rank & D.I.A. 관점 분석 2~3문장",
   "content_quality": "콘텐츠 품질 및 구조 분석 2~3문장",
+  "user_satisfaction": "사용자 만족 신호 분석 2~3문장 (독자 공감 요소, 체류 시간 유도 장치, 댓글·공감 유도 요소 분석)",
   {'"humanize": "인간화 페르소나 적용 분석 2~3문장"' if humanize else '"humanize": null'}
 }}"""
 

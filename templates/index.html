@@ -73,17 +73,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .result-ph{text-align:center;padding:60px 20px;color:#c0c8d4;background:#fff;border-radius:var(--r);box-shadow:var(--shadow);}
 .result-ph-icon{font-size:2.5rem;margin-bottom:10px;opacity:.6;}
 .result-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:none;}
-.res-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.res-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.res-header-left{display:flex;flex-direction:column;gap:3px;}
+.res-card-label{font-size:.92rem;font-weight:700;color:#2d3748;}
+.res-char-count{font-size:.76rem;color:var(--muted);}
+.res-header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .res-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px;}
-#title-output{font-size:1.05rem;font-weight:700;color:var(--text);outline:none;min-height:28px;}
-.res-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.res-title-section{padding:14px 18px 12px;}
+#title-output{font-size:1.2rem;font-weight:800;color:var(--text);outline:none;min-height:28px;line-height:1.5;}
+.res-divider{border:none;border-top:1px solid var(--border);margin:0;}
 .status-pill{border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;}
 .pill-gen{background:#ebf8ff;color:#2b6cb0;}
 .pill-done{background:var(--green-light);color:var(--green);}
 .copy-btn{border:1.5px solid var(--border);background:#fff;color:var(--muted);border-radius:7px;padding:5px 12px;font-size:.8rem;cursor:pointer;transition:all .2s;}
 .copy-btn:hover{border-color:var(--green);color:var(--green);}
-.res-body{padding:16px 20px;}
-#body-output{min-height:320px;max-height:600px;overflow-y:auto;font-size:.88rem;line-height:1.8;outline:none;}
+.copy-btn.copy-format{border-color:var(--green);color:var(--green);}
+.copy-btn.copy-format:hover{background:var(--green-light);}
+.copy-btn.copy-naver{border-color:#03c75a;color:#03c75a;}
+.copy-btn.copy-naver:hover{background:#f0fff8;}
+.res-body{padding:12px 18px 16px;}
+#body-output{min-height:320px;max-height:600px;overflow-y:auto;font-size:.9rem;line-height:1.85;outline:none;}
 #body-output h2{font-size:1.05rem;font-weight:700;color:#2d3748;margin:20px 0 10px;border-left:4px solid var(--green);padding-left:10px;}
 #body-output h3{font-size:.95rem;font-weight:700;color:#4a5568;margin:14px 0 8px;}
 #body-output p{margin-bottom:10px;}
@@ -127,6 +136,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .ac{border-left:4px solid;border-radius:6px;padding:12px 16px;background:#f8f9fa;}
 .ac.blue{border-left-color:var(--blue);}
 .ac.green{border-left-color:var(--green);}
+.ac.orange{border-left-color:#ed8936;}
 .ac.purple{border-left-color:var(--purple);}
 .ac-title{font-size:.83rem;font-weight:700;color:#2d3748;margin-bottom:6px;}
 .ac-body{font-size:.82rem;color:#4a5568;line-height:1.65;}
@@ -278,18 +288,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
       </div>
 
       <div class="result-card" id="result-card">
-        <div class="res-head">
-          <div style="flex:1;">
-            <div class="res-label">제목</div>
-            <div id="title-output" contenteditable="true" class="cursor"></div>
+        <div class="res-header">
+          <div class="res-header-left">
+            <div class="res-card-label">생성된 블로그 포스트</div>
+            <div class="res-char-count" id="char-count"></div>
           </div>
-          <div class="res-actions">
+          <div class="res-header-right">
             <span class="status-pill pill-gen" id="status-pill">생성 중...</span>
-            <button class="copy-btn" onclick="copyAll(this)">전체 복사</button>
+            <button class="copy-btn copy-format" onclick="copyFormatted(this)">서식 유지 복사</button>
+            <button class="copy-btn" onclick="copyPlain(this)">텍스트만 복사</button>
+            <button class="copy-btn copy-naver" onclick="copyNaver(this)">네이버 복사</button>
           </div>
         </div>
+        <div class="res-title-section">
+          <div class="res-label">제목</div>
+          <div id="title-output" contenteditable="true" class="cursor"></div>
+        </div>
+        <hr class="res-divider">
         <div class="res-body">
-          <div class="res-label">본문</div>
           <div id="body-output" contenteditable="true" class="cursor"></div>
         </div>
         <div class="hashtag-bar" id="hashtag-bar"></div>
@@ -568,6 +584,7 @@ function finishGeneration(fullText,main_keyword,method,humanize){
   }
   injectImages();
   updateSidebar();
+  updateCharCount();
   titleOut.classList.remove('cursor');
   bodyOut.classList.remove('cursor');
   statusPill.textContent='생성 완료 ✓';
@@ -649,6 +666,7 @@ async function fetchAIAnalysis(title,bodyText,method,humanize){
     if(data.error){grid.innerHTML=`<div style="color:var(--red);font-size:.82rem;">분석 오류: ${data.error}</div>`;return;}
     let html=`<div class="ac blue"><div class="ac-title">C-Rank &amp; D.I.A. 관점 분석</div><div class="ac-body">${data.c_rank||''}</div></div>
       <div class="ac green"><div class="ac-title">콘텐츠 품질 및 구조</div><div class="ac-body">${data.content_quality||''}</div></div>`;
+    if(data.user_satisfaction) html+=`<div class="ac orange"><div class="ac-title">사용자 만족 신호</div><div class="ac-body">${data.user_satisfaction}</div></div>`;
     if(data.humanize) html+=`<div class="ac purple"><div class="ac-title">인간화 페르소나 적용 분석</div><div class="ac-body">${data.humanize}</div></div>`;
     grid.innerHTML=html;
   }catch(e){grid.innerHTML=`<div style="color:var(--red);font-size:.82rem;">분석 요청 실패: ${e.message}</div>`;}
@@ -736,10 +754,45 @@ async function semiAutoPublish(title,body){
     ② 본문 클릭 후 <strong>Ctrl+V</strong> 붙여넣기 → 발행</span>`;
 }
 
-function copyAll(btn){
+function updateCharCount(){
+  const total=titleOut.innerText.trim().length+bodyOut.innerText.trim().length;
+  const faqIdx=bodyOut.innerText.indexOf('자주 묻는 질문');
+  const bodyOnly=faqIdx>-1?bodyOut.innerText.slice(0,faqIdx).trim().length:bodyOut.innerText.trim().length;
+  const el=document.getElementById('char-count');
+  if(el) el.textContent=`전체 ${total.toLocaleString()}자`+(faqIdx>-1?` | FAQ 제외 ${bodyOnly.toLocaleString()}자`:'');
+}
+
+function _btnFlash(btn,msg,orig){btn.textContent=msg;setTimeout(()=>btn.textContent=orig,2000);}
+
+function copyFormatted(btn){
+  const tags=Array.from(hashtagBar.querySelectorAll('.ht')).map(t=>t.textContent).join(' ');
+  const type='text/html';
+  const html=`<h1>${titleOut.innerText}</h1>${bodyOut.innerHTML}${tags?`<p>${tags}</p>`:''}`;
+  try{
+    navigator.clipboard.write([new ClipboardItem({[type]:new Blob([html],{type})})]);
+  }catch(e){
+    navigator.clipboard.writeText(titleOut.innerText+'\n\n'+bodyOut.innerText+(tags?'\n\n'+tags:''));
+  }
+  _btnFlash(btn,'복사됨 ✓','서식 유지 복사');
+}
+
+function copyPlain(btn){
   const tags=Array.from(hashtagBar.querySelectorAll('.ht')).map(t=>t.textContent).join(' ');
   const text=titleOut.innerText+'\n\n'+bodyOut.innerText+(tags?'\n\n'+tags:'');
-  navigator.clipboard.writeText(text).then(()=>{btn.textContent='복사됨 ✓';setTimeout(()=>btn.textContent='전체 복사',2000);});
+  navigator.clipboard.writeText(text).then(()=>_btnFlash(btn,'복사됨 ✓','텍스트만 복사'));
+}
+
+function copyNaver(btn){
+  const tags=Array.from(hashtagBar.querySelectorAll('.ht')).map(t=>t.textContent).join(' ');
+  const type='text/html';
+  const html=`<h1>${titleOut.innerText}</h1>${bodyOut.innerHTML}${tags?`<p>${tags}</p>`:''}`;
+  try{
+    navigator.clipboard.write([new ClipboardItem({[type]:new Blob([html],{type})})]);
+  }catch(e){
+    navigator.clipboard.writeText(titleOut.innerText+'\n\n'+bodyOut.innerText+(tags?'\n\n'+tags:''));
+  }
+  window.open('https://blog.naver.com/PostWrite.nhn','_blank');
+  _btnFlash(btn,'복사됨 ✓','네이버 복사');
 }
 </script>
 </body>
