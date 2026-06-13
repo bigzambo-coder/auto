@@ -68,10 +68,11 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
 작성 규칙:
 - [제목]: 메인 키워드 포함, 클릭하고 싶은 제목, 30자 이내
 - [본문]:
-  * 최소 1500자
-  * 1인칭 블로그 문체 (경험담 형식)
-  * <h2> 소제목 3~4개
+  * 최소 3000자 이상 (길면 길수록 좋음)
+  * 1인칭 블로그 문체 (경험담 형식), 도입·전개·마무리 완결 구성
+  * <h2> 소제목 4~6개, 각 섹션마다 충분한 분량 작성
   * 첫 단락에 메인 키워드 자연 포함
-  * 마지막 단락에서 독자에게 말 걸기{faq_section}{image_section}"""
+  * 마지막 단락에서 독자에게 말 걸기
+  * 이미지는 반드시 {image_count}개 정확히 삽입 (더 많거나 적으면 절대 안 됨){faq_section}{image_section}"""
 
     return SYSTEM_PROMPT, user_prompt

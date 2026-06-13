@@ -66,6 +66,8 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
   2) 비교 테이블: <table>로 3~5개 항목 비교
   3) FAQ: <h3>Q. 질문</h3><p>답변</p> 형식 5개 이상
   * <blockquote>로 핵심 인용구 1개 이상
-  * 전체 1500자 이상{image_section}"""
+  * 전체 3000자 이상 (충분히 길게)
+  * <h2> 소제목 4~6개
+  * 이미지는 반드시 {image_count}개 정확히 삽입 (더 많거나 적으면 절대 안 됨){image_section}"""
 
     return SYSTEM_PROMPT, user_prompt

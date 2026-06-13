@@ -73,7 +73,7 @@ def generate():
             payload = {
                 'systemInstruction': {'parts': [{'text': system_prompt}]},
                 'contents': [{'role': 'user', 'parts': [{'text': user_prompt}]}],
-                'generationConfig': {'maxOutputTokens': 4096},
+                'generationConfig': {'maxOutputTokens': 8192},
             }
 
             full_text = ''

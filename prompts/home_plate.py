@@ -68,12 +68,13 @@ def build_prompt(topic: str, main_keyword: str, sub_keywords: str, image_count: 
 - [제목]: 감성적·공감형 제목, 클릭하고 싶은 호기심 유발, 메인 키워드 포함, 30자 이내
   예시 패턴: "~인 당신에게 추천하는 ...", "처음엔 몰랐는데 ...", "이거 알고나서 ..."
 - [본문]:
-  * 최소 1500자
+  * 최소 3000자 이상 (충분히 길게)
   * 첫 단락: 독자의 상황·감정에 강하게 공감하는 오프닝 (바로 끌리도록)
   * 특정 독자 페르소나를 지칭하여 개인화 느낌 극대화
   * 감각적 장면 묘사로 시각화 (색·냄새·소리·온도 표현 활용)
   * <blockquote>로 핵심 공감 메시지 1개 이상
   * 마지막 단락: 저장·공유하고 싶은 한 줄 정리 + 공감 유도
-  * <h2> 소제목 3~4개로 구조화{faq_section}{image_section}"""
+  * <h2> 소제목 4~6개로 구조화
+  * 이미지는 반드시 {image_count}개 정확히 삽입 (더 많거나 적으면 절대 안 됨){faq_section}{image_section}"""
 
     return SYSTEM_PROMPT, user_prompt
