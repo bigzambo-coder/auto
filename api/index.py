@@ -24,8 +24,7 @@ _GEMINI_URL = (
 
 @app.route('/')
 def index():
-    api_key_set = bool(os.getenv('GEMINI_API_KEY'))
-    return render_template('index.html', api_key_set=api_key_set)
+    return render_template('index.html')
 
 
 @app.route('/generate', methods=['POST'])
@@ -42,9 +41,9 @@ def generate():
     if not topic or not main_keyword:
         return jsonify({'error': '주제와 메인 키워드를 입력해주세요.'}), 400
 
-    api_key = os.getenv('GEMINI_API_KEY')
+    api_key = (data.get('api_key') or '').strip() or os.getenv('GEMINI_API_KEY', '')
     if not api_key:
-        return jsonify({'error': 'GEMINI_API_KEY가 설정되지 않았습니다.'}), 500
+        return jsonify({'error': 'Gemini API 키를 입력해주세요.'}), 400
 
     user_experience = (data.get('user_experience') or '').strip()
 
@@ -134,10 +133,11 @@ _GEMINI_SIMPLE_URL = (
     '/v1beta/models/gemini-2.5-flash:generateContent'
 )
 
-def _gemini_call(prompt_text, max_tokens=512):
-    api_key = os.getenv('GEMINI_API_KEY')
+def _gemini_call(prompt_text, max_tokens=512, api_key=None):
     if not api_key:
-        return None, 'GEMINI_API_KEY 없음'
+        api_key = os.getenv('GEMINI_API_KEY', '')
+    if not api_key:
+        return None, 'Gemini API 키가 필요합니다'
     payload = {
         'contents': [{'role': 'user', 'parts': [{'text': prompt_text}]}],
         'generationConfig': {'maxOutputTokens': max_tokens},
@@ -156,6 +156,7 @@ def suggest_experience():
     data = request.get_json()
     topic        = (data.get('topic') or '').strip()
     main_keyword = (data.get('main_keyword') or '').strip()
+    api_key      = (data.get('api_key') or '').strip() or os.getenv('GEMINI_API_KEY', '')
     prompt = f"""주제 '{topic}', 키워드 '{main_keyword}'로 네이버 블로그를 작성하려 합니다.
 블로거가 실제 경험했을 법한 구체적이고 생생한 개인 경험담을 아래 조건에 맞게 작성해주세요.
 
@@ -169,7 +170,7 @@ def suggest_experience():
 - 독자가 공감하고 몰입할 수 있는 생생한 묘사
 - 설명 없이 경험담 본문만 출력 (제목·소제목 없이 자연스럽게 이어지는 글)
 - 마크다운 서식(**볼드**, *이탤릭*, # 제목 등) 절대 사용 금지 — 순수 텍스트만 출력"""
-    text, err = _gemini_call(prompt, 1200)
+    text, err = _gemini_call(prompt, 1200, api_key=api_key)
     if err:
         return jsonify({'error': err}), 500
     return jsonify({'experience': text})
@@ -182,6 +183,7 @@ def analyze():
     body   = (data.get('body') or '').strip()
     method = data.get('method', 'traditional')
     humanize = bool(data.get('humanize', False))
+    api_key  = (data.get('api_key') or '').strip() or os.getenv('GEMINI_API_KEY', '')
 
     method_names = {
         'traditional': 'C-Rank/D.I.A.+',
@@ -209,7 +211,7 @@ def analyze():
   {humanize_field}
 }}"""
 
-    text, err = _gemini_call(prompt, 2500)
+    text, err = _gemini_call(prompt, 2500, api_key=api_key)
     if err:
         return jsonify({'error': err}), 500
 

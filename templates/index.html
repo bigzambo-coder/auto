@@ -191,6 +191,25 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .api-warn{background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r);padding:13px 16px;color:#92400e;font-size:.81rem;margin-bottom:14px;}
 .api-warn strong{display:block;margin-bottom:3px;}
 
+/* API Key Card */
+.api-key-card{border:1.5px solid var(--accent-border);background:var(--surface);}
+.api-key-card.unset{border-color:rgba(248,113,113,.4);}
+.api-key-row{display:flex;gap:8px;align-items:center;}
+.api-key-wrap{position:relative;flex:1;}
+.api-key-wrap input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 38px 10px 13px;font-size:.88rem;outline:none;background:var(--surface-2);color:var(--text);transition:border-color .18s,box-shadow .18s;font-family:monospace;letter-spacing:.04em;}
+.api-key-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+.api-key-wrap input::placeholder{color:var(--muted);letter-spacing:0;font-family:inherit;}
+.key-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:2px;transition:color .15s;}
+.key-eye:hover{color:var(--text-2);}
+.btn-save-key{background:var(--accent-h);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:.84rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;}
+.btn-save-key:hover{background:var(--accent);}
+.api-key-meta{display:flex;justify-content:space-between;align-items:center;margin-top:7px;}
+.api-key-status{font-size:.75rem;display:flex;align-items:center;gap:5px;}
+.api-key-status.ok{color:var(--green-h);}
+.api-key-status.warn{color:var(--red);}
+.api-key-link{font-size:.73rem;color:var(--accent);text-decoration:none;opacity:.8;}
+.api-key-link:hover{opacity:1;text-decoration:underline;}
+
 /* Utilities */
 .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -211,12 +230,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <div class="layout">
 <main>
-  {% if not api_key_set %}
-  <div class="api-warn">
-    <strong>⚠️ GEMINI_API_KEY가 설정되지 않았습니다</strong>
-    Vercel → Settings → Environment Variables에서 <code>GEMINI_API_KEY</code>를 추가 후 재배포해주세요.
+  <div class="card api-key-card" id="api-key-card">
+    <div class="card-title">Gemini API 키</div>
+    <div class="api-key-row">
+      <div class="api-key-wrap">
+        <input type="password" id="api-key-input" placeholder="AIzaSy... (Google AI Studio에서 발급)"
+               autocomplete="off" onkeydown="if(event.key==='Enter') saveApiKey()">
+        <button class="key-eye" id="key-eye" onclick="toggleKeyVis()" title="표시/숨기기">◉</button>
+      </div>
+      <button class="btn-save-key" onclick="saveApiKey()">저장</button>
+    </div>
+    <div class="api-key-meta">
+      <div class="api-key-status warn" id="api-key-status">⚠ API 키를 입력 후 저장해주세요</div>
+      <a class="api-key-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio에서 무료 발급 →</a>
+    </div>
   </div>
-  {% endif %}
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="generate">주제로 생성하기</button>
@@ -428,6 +456,44 @@ let generationCtx = {};
 
 function stripHtml(s){ return (s||'').replace(/<[^>]*>/g,'').trim(); }
 
+/* ── API Key 관리 ── */
+function loadApiKey(){
+  const key = localStorage.getItem('gemini_api_key') || '';
+  document.getElementById('api-key-input').value = key;
+  _applyKeyStatus(key);
+  _refreshGenBtn();
+}
+function saveApiKey(){
+  const key = document.getElementById('api-key-input').value.trim();
+  if(key){ localStorage.setItem('gemini_api_key', key); }
+  else { localStorage.removeItem('gemini_api_key'); }
+  _applyKeyStatus(key);
+  _refreshGenBtn();
+}
+function getApiKey(){ return localStorage.getItem('gemini_api_key') || ''; }
+function toggleKeyVis(){
+  const inp = document.getElementById('api-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function _applyKeyStatus(key){
+  const el = document.getElementById('api-key-status');
+  const card = document.getElementById('api-key-card');
+  if(key){
+    el.className = 'api-key-status ok';
+    el.textContent = `✓ 저장됨 (${key.slice(0,8)}...)`;
+    card.classList.remove('unset');
+  } else {
+    el.className = 'api-key-status warn';
+    el.textContent = '⚠ API 키를 입력 후 저장해주세요';
+    card.classList.add('unset');
+  }
+}
+function _refreshGenBtn(){
+  const topic = document.getElementById('topic').value.trim();
+  const kw    = document.getElementById('main-keyword').value.trim();
+  genBtn.disabled = !(topic && kw && getApiKey());
+}
+
 document.querySelectorAll('.method-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.method-btn').forEach(b=>b.classList.remove('active'));
@@ -460,7 +526,7 @@ async function suggestExperience(){
   const btn=document.getElementById('suggest-btn');
   btn.disabled=true; btn.textContent='제안 중...';
   try{
-    const res=await fetch('/suggest_experience',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,main_keyword:kw})});
+    const res=await fetch('/suggest_experience',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,main_keyword:kw,api_key:getApiKey()})});
     const data=await res.json();
     if(data.experience){
       const ta=document.getElementById('user-experience');
@@ -489,9 +555,8 @@ updateRange(document.getElementById('vid-range'),'vid-val');
 const topicEl=document.getElementById('topic');
 const kwEl=document.getElementById('main-keyword');
 const genBtn=document.getElementById('gen-btn');
-[topicEl,kwEl].forEach(el=>el.addEventListener('input',()=>{
-  genBtn.disabled=!(topicEl.value.trim()&&kwEl.value.trim());
-}));
+[topicEl,kwEl].forEach(el=>el.addEventListener('input',_refreshGenBtn));
+loadApiKey();
 
 const titleOut=document.getElementById('title-output');
 const bodyOut=document.getElementById('body-output');
@@ -540,7 +605,7 @@ async function generate(){
   try{
     const res=await fetch('/generate',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({topic,main_keyword,sub_keywords,method,humanize,user_experience,image_count,include_faq})
+      body:JSON.stringify({topic,main_keyword,sub_keywords,method,humanize,user_experience,image_count,include_faq,api_key:getApiKey()})
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));showError(e.error||`서버 오류 (${res.status})`);return;}
     const reader=res.body.getReader();
@@ -670,7 +735,7 @@ async function fetchAIAnalysis(title,bodyText,method,humanize){
   grid.innerHTML='<div style="color:var(--muted);font-size:.83rem;" class="loading-dots">AI 분석 중</div>';
   try{
     const res=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({title,body:bodyText.slice(0,1800),method,humanize})});
+      body:JSON.stringify({title,body:bodyText.slice(0,1800),method,humanize,api_key:getApiKey()})});
     const data=await res.json();
     if(data.error){grid.innerHTML=`<div style="color:var(--red);font-size:.82rem;">분석 오류: ${data.error}</div>`;return;}
     let html=`<div class="ac blue"><div class="ac-title">C-Rank &amp; D.I.A. 관점 분석</div><div class="ac-body">${data.c_rank||''}</div></div>
