@@ -723,10 +723,10 @@ function renderQualityCheck(title,bodyHtml,bodyText,main_keyword){
   checks.forEach((c,i)=>{
     const{ok,detail}=c.fn();
     if(ok) pass++;
-    rows+=`<tr><td style="color:var(--muted);">${i+1}</td><td><strong>${c.name}</strong></td>
-      <td style="color:var(--muted);font-size:.76rem;">${c.method}</td>
+    rows+=`<tr><td style="color:var(--text-2);">${i+1}</td><td><strong style="color:var(--text);">${c.name}</strong></td>
+      <td style="color:var(--text-2);font-size:.76rem;">${c.method}</td>
       <td class="${ok?'check-pass':'check-fail'}">${ok?'✓':'✗'}</td>
-      <td style="font-size:.77rem;">${detail}</td></tr>`;
+      <td style="font-size:.77rem;color:var(--text-2);">${detail}</td></tr>`;
   });
   document.getElementById('check-tbody').innerHTML=rows;
   document.getElementById('score-num').textContent=`${Math.round(pass*100/checks.length)}점`;

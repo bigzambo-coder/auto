@@ -160,15 +160,16 @@ def suggest_experience():
 블로거가 실제 경험했을 법한 구체적이고 생생한 개인 경험담을 아래 조건에 맞게 작성해주세요.
 
 조건:
-- 10~15문장 이상, 충분히 길고 풍부하게
+- 20문장 이상, 충분히 길고 풍부하게 (절대 중간에 끊지 말고 완성된 글로 출력)
 - 1인칭 구어체 ("저는", "제가", "솔직히", "사실", "처음엔" 포함)
 - 처음 접한 계기·상황 (날짜·장소·상황 구체적으로)
 - 사용/경험 과정에서 느낀 점 (구체적 에피소드, 감정, 놀랐던 순간)
 - 주변 반응이나 비교 경험 (가족·친구·동료 등)
 - 결과적 만족·아쉬운 점 (솔직하게, 단점도 포함)
 - 독자가 공감하고 몰입할 수 있는 생생한 묘사
-- 설명 없이 경험담 본문만 출력 (제목·소제목 없이 자연스럽게 이어지는 글)"""
-    text, err = _gemini_call(prompt, 2000)
+- 설명 없이 경험담 본문만 출력 (제목·소제목 없이 자연스럽게 이어지는 글)
+- 마크다운 서식(**볼드**, *이탤릭*, # 제목 등) 절대 사용 금지 — 순수 텍스트만 출력"""
+    text, err = _gemini_call(prompt, 4000)
     if err:
         return jsonify({'error': err}), 500
     return jsonify({'experience': text})
@@ -198,30 +199,32 @@ def analyze():
     prompt = f"""다음 네이버 블로그 글을 {mn} SEO 관점에서 분석하세요.
 
 제목: {title}
-본문 (일부): {body[:1500]}
+본문 (일부): {body[:1200]}
 
-반드시 아래 JSON만 출력하세요. 마크다운 코드블록(```) 없이 순수 JSON만:
+아래 JSON 형식으로만 출력하세요. 백틱(```)이나 다른 텍스트 없이 JSON만:
 {{
-  "c_rank": "C-Rank & D.I.A. 관점 분석 2문장",
-  "content_quality": "콘텐츠 품질 및 구조 분석 2문장",
-  "user_satisfaction": "사용자 만족 신호 분석 2문장",
+  "c_rank": "C-Rank & D.I.A. 관점에서 이 글의 신뢰도·전문성·경험치 평가 (2~3문장)",
+  "content_quality": "콘텐츠 구조·가독성·정보 밀도 평가 (2~3문장)",
+  "user_satisfaction": "사용자 체류 시간·공감·재방문 유도 요소 평가 (2~3문장)",
   {humanize_field}
 }}"""
 
-    text, err = _gemini_call(prompt, 1500)
+    text, err = _gemini_call(prompt, 2500)
     if err:
         return jsonify({'error': err}), 500
 
-    # 마크다운 코드블록 제거
-    text = re.sub(r'```(?:json)?\s*', '', text).strip()
+    # 마크다운 코드블록 및 불필요한 래핑 제거
+    text = re.sub(r'```[a-zA-Z]*', '', text)
+    text = re.sub(r'```', '', text).strip()
     json_match = re.search(r'\{[\s\S]+\}', text)
     if not json_match:
-        return jsonify({'error': '분석 파싱 실패'}), 500
+        return jsonify({'error': f'분석 파싱 실패 (응답: {text[:200]})'}), 500
     try:
         result = json.loads(json_match.group())
         return jsonify(result)
-    except Exception as e:
-        return jsonify({'error': f'JSON 파싱 오류: {str(e)}'}), 500
+    except json.JSONDecodeError as e:
+        raw = json_match.group()
+        return jsonify({'error': f'JSON 파싱 오류: {str(e)} | 원문: {raw[:200]}'}), 500
 
 
 @app.route('/publish', methods=['POST'])
